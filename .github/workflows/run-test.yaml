@@ -12,6 +12,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3305:3306
+        options: >-
+          --health-cmd='mysqladmin ping --silent'
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        env:
+          MYSQL_ROOT_PASSWORD: admin
+          MYSQL_DATABASE: billing
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -22,22 +36,24 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set up Docker Compose
-        run: docker-compose up -d
-
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
+          until docker exec mysql-container mysqladmin ping -h "localhost" --port=3305 --silent; do
             echo "MySQL is unavailable - sleeping"
             sleep 5
           done
           echo "MySQL is up - executing command"
 
+#      - name: MySQL create database
+#        env:
+#          MYSQL_PWD: admin
+#        run: docker exec mysql-container mysql -h localhost --port=3305 -uroot -padmin -e "CREATE DATABASE billing;"
+
       - name: Test MySQL connection
         env:
           MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -h mysql-container -uroot -padmin -e "SHOW DATABASES;"
+        run: docker exec mysql-container mysql -h localhost --port=3305 -uroot -padmin -e "SHOW DATABASES;"
 
       - name: Run JPA tests
         run: ./gradlew build test
