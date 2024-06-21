@@ -1,0 +1,62 @@
+name: JPA Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Pull MySQL image
+        run: docker pull mysql:latest
+
+      - name: Start MySQL container
+        run: |
+          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:8.0
+
+      - name: Wait for MySQL to be healthy
+        run: |
+          until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 1
+          done
+
+      - name: Create application-ci.yml
+        run: |
+          echo "spring:" > src/main/resources/application-ci.yml
+          echo "  profiles:" >> src/main/resources/application-ci.yml
+          echo "    active: ci" >> src/main/resources/application-ci.yml
+          echo "  datasource:" >> src/main/resources/application-ci.yml
+          echo "    url: jdbc:mysql://localhost:3305/billing" >> src/main/resources/application-ci.yml
+          echo "    username: root" >> src/main/resources/application-ci.yml
+          echo "    password: ${MYSQL_ROOT_PASSWORD}" >> src/main/resources/application-ci.yml
+          echo "  jpa:" >> src/main/resources/application-ci.yml
+          echo "    hibernate:" >> src/main/resources/application-ci.yml
+          echo "      ddl-auto: update" >> src/main/resources/application-ci.yml
+          echo "    properties:" >> src/main/resources/application-ci.yml
+          echo "      hibernate:" >> src/main/resources/application-ci.yml
+          echo "        dialect: org.hibernate.dialect.MySQL8Dialect" >> src/main/resources/application-ci.yml
+
+      - name: Run JPA tests
+        run: ./gradlew test
+        env:
+          SPRING_PROFILES_ACTIVE: ci
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
+      - name: Stop MySQL container
+        run: docker stop mysql-container
