@@ -34,22 +34,21 @@ jobs:
           done
           echo "MySQL is up - executing command"
 
+      - name: MySQL create database
+        env:
+          MYSQL_PWD: admin
+        run: docker exec mysql-container mysql -uroot -e "CREATE DATABASE billing;"
+
       - name: Test MySQL connection
         env:
           MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -uroot -padmin -e "SHOW DATABASES;"
-
-      - name: Create billing database
-        env:
-          MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -uroot -padmin -e "CREATE DATABASE billing;"
+        run: docker exec mysql-container mysql -uroot -e "SHOW DATABASES;"
 
       - name: Run JPA tests
         run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
           MYSQL_ROOT_PASSWORD: admin
-          MYSQL_DATABASE: billing  # 여기에 생성한 데이터베이스 이름을 추가
 
       - name: Print application logs
         run: cat build/test-results/test/*.xml
