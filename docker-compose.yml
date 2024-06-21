@@ -6,5 +6,6 @@ services:
     container_name: mysql-container
     environment:
       MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: billing  # 생성할 데이터베이스 이름
     ports:
       - "3305:3306"
