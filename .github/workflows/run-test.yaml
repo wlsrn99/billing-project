@@ -22,24 +22,20 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Pull MySQL image
-        run: docker pull mysql:latest
-
-      - name: Start MySQL container
-        run: |
-          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=admin -p 3305:3306 mysql:8.0
+      - name: Set up Docker Compose
+        run: docker-compose up -d
 
       - name: Wait for MySQL to be healthy
         run: |
+          echo "Waiting for MySQL to be ready..."
           until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
-            echo "Waiting for MySQL to be ready..."
-            sleep 1
+            echo "MySQL is unavailable - sleeping"
+            sleep 5
           done
+          echo "MySQL is up - executing command"
 
       - name: Test MySQL connection
-        run: |
-          docker exec -i mysql-container mysql -uroot -padmin -e "SHOW DATABASES;" 
-         
+        run: docker exec mysql-container mysql -uroot -padmin -e "SHOW DATABASES;"
 
       - name: Run JPA tests
         run: ./gradlew build test
@@ -50,5 +46,5 @@ jobs:
       - name: Print application logs
         run: cat build/test-results/test/*.xml
 
-      - name: Stop MySQL container
-        run: docker stop mysql-container
+      - name: Stop Docker Compose
+        run: docker-compose down
