@@ -63,7 +63,7 @@ jobs:
           cat src/test/resources/application-ci.yml
 
       - name: Run JPA tests
-        run: ./gradlew test
+        run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
