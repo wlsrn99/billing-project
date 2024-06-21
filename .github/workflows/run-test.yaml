@@ -1,0 +1,81 @@
+name: JPA Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Docker Compose
+        run: docker-compose up -d
+
+      - name: Wait for MySQL to be healthy
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
+            echo "MySQL is unavailable - sleeping"
+            sleep 5
+          done
+          echo "MySQL is up - executing command"
+
+      - name: Test MySQL connection
+        env:
+          MYSQL_PWD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: docker exec mysql-container mysql -h mysql-container -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
+
+      - name: Create application.yml directory
+        run: mkdir -p src/test/resources
+
+      - name: Create application.yml
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: |
+          cat <<EOF > src/test/resources/application.yml
+          spring:
+            profiles:
+              active: test
+            datasource:
+              url: jdbc:mysql://localhost:3305/billing
+              username: root
+              password: ${MYSQL_ROOT_PASSWORD}
+              driver-class-name: com.mysql.cj.jdbc.Driver
+            jpa:
+              hibernate:
+                ddl-auto: create
+              properties:
+                hibernate:
+                  format_sql: true
+                  use_sql_comments: true
+          # logging:
+          #   level:
+          #     org.hibernate.SQL: debug
+          EOF
+
+      - name: Run JPA tests
+        run: ./gradlew build test
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: billing
+
+      # - name: Print application logs
+      #   run: cat build/test-results/test/*.xml
+
+      - name: Stop Docker Compose
+        run: docker-compose down
