@@ -27,7 +27,7 @@ jobs:
 
       - name: Start MySQL container
         run: |
-          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:8.0
+          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=admin -p 3305:3306 mysql:8.0
 
       - name: Wait for MySQL to be healthy
         run: |
@@ -36,14 +36,17 @@ jobs:
             sleep 1
           done
 
+      - name: Debug MySQL container logs
+        run: docker logs mysql-container
+
       - name: Debug environment variables
-        run: echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}"
+        run: env
 
       - name: Run JPA tests
         run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: admin
 
       - name: Stop MySQL container
         run: docker stop mysql-container

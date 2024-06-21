@@ -11,7 +11,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3305/billing
     username: root
-    password: ${MYSQL_ROOT_PASSWORD}
+    password: admin
   jpa:
     hibernate:
       ddl-auto: update
