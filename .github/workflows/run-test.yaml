@@ -35,7 +35,9 @@ jobs:
           echo "MySQL is up - executing command"
 
       - name: Test MySQL connection
-        run: docker exec mysql-container mysql -uroot -padmin -e "SHOW DATABASES;"
+        env:
+          MYSQL_PWD: admin
+        run: docker exec mysql-container mysql -uroot -e "SHOW DATABASES;"
 
       - name: Run JPA tests
         run: ./gradlew build test
