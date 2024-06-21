@@ -38,9 +38,8 @@ jobs:
 
       - name: Test MySQL connection
         run: |
-          docker exec mysql-container mysql -u root -p admin -e "SHOW DATABASES;"
-      
-      
+          docker exec -i mysql-container mysql -uroot -padmin -e "SHOW DATABASES;" 
+         
 
       - name: Run JPA tests
         run: ./gradlew build test
