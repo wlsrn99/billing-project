@@ -1,12 +1,12 @@
 name: JPA Test
 
 on:
-  push:
-    branches:
-      - develop
   pull_request:
     branches:
+      - master
       - develop
+      - 'feature/*'
+
 
 jobs:
   test:
@@ -62,9 +62,6 @@ jobs:
                 hibernate:
                   format_sql: true
                   use_sql_comments: true
-          # logging:
-          #   level:
-          #     org.hibernate.SQL: debug
           EOF
 
       - name: Run JPA tests
