@@ -9,7 +9,7 @@ spring:
     activate:
       on-profile: ci
   datasource:
-    url: jdbc:mysql://localhost:3305/billing
+    url: jdbc:mysql://localhost:3306/billing
     username: root
     password: admin
   jpa:

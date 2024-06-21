@@ -43,8 +43,9 @@ jobs:
         run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
-          MYSQL_ROOT_PASSWORD: admin
-          MYSQL_DATABASE: billing
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/billing
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: admin
 
       - name: Print application logs
         run: cat build/test-results/test/*.xml
