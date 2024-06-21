@@ -27,7 +27,7 @@ jobs:
 
       - name: Start MySQL container
         run: |
-          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:latest
+          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:8.0
 
       - name: Wait for MySQL to be healthy
         run: |
