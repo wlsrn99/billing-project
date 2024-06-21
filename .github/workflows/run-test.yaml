@@ -1,26 +1,24 @@
-name: CI
+name: JPA Test
 
 on:
   push:
     branches:
-      - develop
-      - 'feature/*'
+      - main
   pull_request:
     branches:
-      - develop
+      - main
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     services:
       mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: billing
+        image: mysql:latest
         ports:
           - 3305:3306
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -28,33 +26,25 @@ jobs:
           --health-retries=3
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up JDK 21
         uses: actions/setup-java@v2
         with:
-          distribution: 'temurin'
           java-version: '21'
+          distribution: 'adopt'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Wait for MySQL
+      - name: Wait for MySQL to be healthy
         run: |
-          until mysqladmin ping -h"127.0.0.1" -P3305 --silent; do
-            echo 'waiting for mysql to be connectable...'
-            sleep 5
+          until [ "$(docker inspect --format='{{json .State.Health.Status}}' $(docker-compose ps -q mysql))" == "\"healthy\"" ]; do
+            sleep 1;
           done
 
-      - name: Print environment variables
-        run: printenv
-
-      - name: Run tests
+      - name: Run JPA tests
+        run: ./gradlew test
         env:
-          SPRING_PROFILES_ACTIVE: ci
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: ./gradlew clean test
-
-      - name: MySQL logs
-        run: docker logs $(docker ps -q --filter "name=mysql")
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
