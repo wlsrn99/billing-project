@@ -38,19 +38,19 @@ jobs:
 
       - name: Create application-ci.yml
         run: |
-          echo "spring:" > src/main/resources/application-ci.yml
-          echo "  profiles:" >> src/main/resources/application-ci.yml
-          echo "    active: ci" >> src/main/resources/application-ci.yml
-          echo "  datasource:" >> src/main/resources/application-ci.yml
-          echo "    url: jdbc:mysql://localhost:3305/billing" >> src/main/resources/application-ci.yml
-          echo "    username: root" >> src/main/resources/application-ci.yml
-          echo "    password: ${MYSQL_ROOT_PASSWORD}" >> src/main/resources/application-ci.yml
-          echo "  jpa:" >> src/main/resources/application-ci.yml
-          echo "    hibernate:" >> src/main/resources/application-ci.yml
-          echo "      ddl-auto: update" >> src/main/resources/application-ci.yml
-          echo "    properties:" >> src/main/resources/application-ci.yml
-          echo "      hibernate:" >> src/main/resources/application-ci.yml
-          echo "        dialect: org.hibernate.dialect.MySQL8Dialect" >> src/main/resources/application-ci.yml
+          echo "spring:" > src/test/resources/application-ci.yml
+          echo "  profiles:" >> src/test/resources/application-ci.yml
+          echo "    active: ci" >> src/test/resources/application-ci.yml
+          echo "  datasource:" >> src/test/resources/application-ci.yml
+          echo "    url: jdbc:mysql://localhost:3305/billing" >> src/test/resources/application-ci.yml
+          echo "    username: root" >> src/test/resources/application-ci.yml
+          echo "    password: ${MYSQL_ROOT_PASSWORD}" >> src/test/resources/application-ci.yml
+          echo "  jpa:" >> src/test/resources/application-ci.yml
+          echo "    hibernate:" >> src/test/resources/application-ci.yml
+          echo "      ddl-auto: update" >> src/test/resources/application-ci.yml
+          echo "    properties:" >> src/test/resources/application-ci.yml
+          echo "      hibernate:" >> src/test/resources/application-ci.yml
+          echo "        dialect: org.hibernate.dialect.MySQL8Dialect" >> src/test/resources/application-ci.yml
 
       - name: Run JPA tests
         run: ./gradlew test
