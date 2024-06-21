@@ -81,6 +81,8 @@ coverage/
 **/.serverless/
 dist/
 
+# YAML 설정 파일 무시
+application.yml
 
 #HELP.md 파일 무시
 HELP.md
