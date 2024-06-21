@@ -14,7 +14,6 @@ import jakarta.persistence.EntityManager;
 
 @SpringBootTest
 @Transactional
-@ActiveProfiles("test")
 public class UserRepositoryTest {
 	@Autowired
 	EntityManager entityManager;
