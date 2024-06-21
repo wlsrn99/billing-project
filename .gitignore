@@ -82,7 +82,7 @@ coverage/
 dist/
 
 # YAML 설정 파일 무시
-*.yml
+application.yml
 
 #HELP.md 파일 무시
 HELP.md
