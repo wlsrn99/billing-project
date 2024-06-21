@@ -28,7 +28,7 @@ jobs:
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
+          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
             echo "MySQL is unavailable - sleeping"
             sleep 5
           done
@@ -37,7 +37,7 @@ jobs:
       - name: Test MySQL connection
         env:
           MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -h localhost -uroot -padmin -e "SHOW DATABASES;"
+        run: docker exec mysql-container mysql -h mysql-container -uroot -padmin -e "SHOW DATABASES;"
 
       - name: Run JPA tests
         run: ./gradlew build test
