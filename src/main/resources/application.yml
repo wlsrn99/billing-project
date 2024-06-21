@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: local
+
+  datasource:
+    url: jdbc:mysql://localhost:3305/billing
+    username: root
+    password: admin
+
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug

@@ -43,7 +43,7 @@ jobs:
       - name: Run JPA tests
         run: ./gradlew build test
         env:
-          SPRING_PROFILES_ACTIVE: ci
+          SPRING_PROFILES_ACTIVE: test
           MYSQL_ROOT_PASSWORD: admin
           MYSQL_DATABASE: billing
 
