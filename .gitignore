@@ -83,3 +83,6 @@ dist/
 
 # YAML 설정 파일 무시
 *.yml
+
+#HELP.md 파일 무시
+HELP.md
