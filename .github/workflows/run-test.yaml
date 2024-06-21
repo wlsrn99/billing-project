@@ -34,11 +34,6 @@ jobs:
           done
           echo "MySQL is up - executing command"
 
-      - name: MySQL create database
-        env:
-          MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -h mysql-container -uroot -padmin -e "CREATE DATABASE billing;"
-
       - name: Test MySQL connection
         env:
           MYSQL_PWD: admin
