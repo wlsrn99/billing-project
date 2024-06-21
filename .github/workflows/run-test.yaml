@@ -28,7 +28,7 @@ jobs:
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
+          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
             echo "MySQL is unavailable - sleeping"
             sleep 5
           done
@@ -37,18 +37,19 @@ jobs:
       - name: MySQL create database
         env:
           MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -uroot -e "CREATE DATABASE billing;"
+        run: docker exec mysql-container mysql -h mysql-container -uroot -e "CREATE DATABASE billing;"
 
       - name: Test MySQL connection
         env:
           MYSQL_PWD: admin
-        run: docker exec mysql-container mysql -uroot -e "SHOW DATABASES;"
+        run: docker exec mysql-container mysql -h mysql-container -uroot -e "SHOW DATABASES;"
 
       - name: Run JPA tests
         run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
           MYSQL_ROOT_PASSWORD: admin
+          MYSQL_DATABASE: billing
 
       - name: Print application logs
         run: cat build/test-results/test/*.xml
