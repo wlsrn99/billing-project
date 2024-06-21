@@ -1,7 +1,5 @@
-# Actions 이름 github 페이지에서 볼 수 있다.
 name: CI
 
-# Event Trigger 특정 액션 (Push, Pull_Request)등이 명시한 Branch에서 일어나면 동작을 수행한다.
 on:
   push:
     branches: [ develop, feature/* ]
@@ -9,24 +7,48 @@ on:
     branches:
       - develop
 
-# 실제 어떤 작업을 실행할지에 대한 명시
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: admin
+          MYSQL_DATABASE: billing
+        ports:
+          - 3305:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
-      - name: checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: java setup
+      - name: Set up JDK 21
         uses: actions/setup-java@v2
         with:
-          distribution: 'temurin' # 최신 Java 배포판
+          distribution: 'temurin'
           java-version: '21'
 
-      - name: make executable gradlew
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: run unittest
+      - name: Wait for MySQL
         run: |
-          ./gradlew clean test
+          until mysqladmin ping -h"127.0.0.1" -P3305 --silent; do
+            echo 'waiting for mysql to be connectable...'
+            sleep 5
+          done
+
+      - name: Run tests
+        env:
+          SPRING_PROFILES_ACTIVE: ci
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3305/billing
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: admin
+        run: ./gradlew clean test
