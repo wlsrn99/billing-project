@@ -69,5 +69,8 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: billing
 
+      - name: Print application logs
+        run: cat build/logs/spring-boot.log
+
       - name: Stop Docker Compose
         run: docker-compose down
