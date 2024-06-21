@@ -60,7 +60,7 @@ jobs:
                   use_sql_comments: true
           logging:
             level:
-              org.hibernate.SQL: debug" > src/test/resources/application.yaml
+              org.hibernate.SQL: debug" > src/test/resources/application.yml
 
       - name: Run JPA tests
         run: ./gradlew build test
