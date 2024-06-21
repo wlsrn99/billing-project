@@ -34,6 +34,7 @@ jobs:
           done
           echo "MySQL is up - executing command"
 
+
       - name: Test MySQL connection
         env:
           MYSQL_PWD: admin
@@ -43,9 +44,8 @@ jobs:
         run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/billing
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: admin
+          MYSQL_ROOT_PASSWORD: admin
+          MYSQL_DATABASE: billing
 
       - name: Print application logs
         run: cat build/test-results/test/*.xml
