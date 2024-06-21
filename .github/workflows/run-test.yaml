@@ -46,26 +46,26 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-               cat <<EOF > src/test/resources/application.yml
-               spring:
-               profiles:
-                active: test
-               datasource:
-                url: jdbc:mysql://localhost:3305/billing
-                username: root
-                password: ${MYSQL_ROOT_PASSWORD}
-                driver-class-name: com.mysql.cj.jdbc.Driver
-               jpa:
+          cat <<EOF > src/test/resources/application.yml
+          spring:
+            profiles:
+              active: test
+            datasource:
+              url: jdbc:mysql://localhost:3305/billing
+              username: root
+              password: ${MYSQL_ROOT_PASSWORD}
+              driver-class-name: com.mysql.cj.jdbc.Driver
+            jpa:
+              hibernate:
+                ddl-auto: create
+              properties:
                 hibernate:
-                  ddl-auto: create
-                properties:
-                  hibernate:
-                    format_sql: true
-                    use_sql_comments: true
-          #          logging:
-          #            level:
-          #              org.hibernate.SQL: debug
-               EOF
+                  format_sql: true
+                  use_sql_comments: true
+          # logging:
+          #   level:
+          #     org.hibernate.SQL: debug
+          EOF
 
       - name: Run JPA tests
         run: ./gradlew build test
@@ -74,8 +74,8 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: billing
 
-      #      - name: Print application logs
-      #        run: cat build/test-results/test/*.xml
+      # - name: Print application logs
+      #   run: cat build/test-results/test/*.xml
 
       - name: Stop Docker Compose
         run: docker-compose down
