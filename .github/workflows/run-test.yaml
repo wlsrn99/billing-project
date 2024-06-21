@@ -39,7 +39,10 @@ jobs:
           MYSQL_PWD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: docker exec mysql-container mysql -h mysql-container -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
-      - name: Create application.yaml
+      - name: Create application.yml directory
+        run: mkdir -p src/test/resources
+
+      - name: Create application.yml
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
@@ -58,9 +61,9 @@ jobs:
                 hibernate:
                   format_sql: true
                   use_sql_comments: true
-          logging:
-            level:
-              org.hibernate.SQL: debug" > src/test/resources/application.yml
+#          logging:
+#            level:
+#              org.hibernate.SQL: debug" > src/test/resources/application.yml
 
       - name: Run JPA tests
         run: ./gradlew build test
