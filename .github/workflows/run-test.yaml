@@ -36,17 +36,20 @@ jobs:
             sleep 1
           done
 
-      - name: Debug MySQL container logs
-        run: docker logs mysql-container
-
-      - name: Debug environment variables
-        run: env
+      - name: Test MySQL connection
+        run: |
+          docker exec mysql-container mysql -u root -p admin -e "SHOW DATABASES;"
+      
+      
 
       - name: Run JPA tests
         run: ./gradlew build test
         env:
           SPRING_PROFILES_ACTIVE: ci
           MYSQL_ROOT_PASSWORD: admin
+
+      - name: Print application logs
+        run: cat build/test-results/test/*.xml
 
       - name: Stop MySQL container
         run: docker stop mysql-container
