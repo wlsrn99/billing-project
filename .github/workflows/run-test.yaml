@@ -41,6 +41,11 @@ jobs:
           echo "spring:" > src/test/resources/application-ci.yml
           echo "  profiles:" >> src/test/resources/application-ci.yml
           echo "    active: ci" >> src/test/resources/application-ci.yml
+          echo "---" >> src/test/resources/application-ci.yml
+          echo "spring:" >> src/test/resources/application-ci.yml
+          echo "  config:" >> src/test/resources/application-ci.yml
+          echo "    activate:" >> src/test/resources/application-ci.yml
+          echo "      on-profile: ci" >> src/test/resources/application-ci.yml
           echo "  datasource:" >> src/test/resources/application-ci.yml
           echo "    url: jdbc:mysql://localhost:3305/billing" >> src/test/resources/application-ci.yml
           echo "    username: root" >> src/test/resources/application-ci.yml
@@ -51,6 +56,11 @@ jobs:
           echo "    properties:" >> src/test/resources/application-ci.yml
           echo "      hibernate:" >> src/test/resources/application-ci.yml
           echo "        dialect: org.hibernate.dialect.MySQL8Dialect" >> src/test/resources/application-ci.yml
+
+      - name: Debug environment variables
+        run: |
+          echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+          cat src/test/resources/application-ci.yml
 
       - name: Run JPA tests
         run: ./gradlew test
