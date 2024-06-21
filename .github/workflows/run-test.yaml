@@ -22,8 +22,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set up Docker Compose
-        run: docker-compose up -d
+      - name: Build and run Docker Compose
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: |
+          docker-compose up -d
 
       - name: Wait for MySQL to be healthy
         run: |
