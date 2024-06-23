@@ -57,11 +57,6 @@ public class User extends Timestamped{
 		this.statusChangedAt = statusChangedAt;
 	}
 
-	//회원 상태 변경 - 탈퇴 회원
-	public void withdrawUser() {
-		this.userType = UserType.DEACTIVATED;
-	}
-
 	//회원 상태 변경 - 인증 회원
 	public void ActiveUser() {
 		this.userType = UserType.ACTIVE;
