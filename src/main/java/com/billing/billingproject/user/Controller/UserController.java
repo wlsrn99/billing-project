@@ -64,8 +64,7 @@ public class UserController {
 	public ResponseEntity<ResponseMessage<String>> logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request){
 
 		String accessToken = jwtUtil.getJwtFromHeader(request);
-		String refreshToken = jwtUtil.getJwtRefreshTokenFromHeader(request);
-		userService.logout(userDetails.getUser(), accessToken, refreshToken);
+		userService.logout(userDetails.getUser(), accessToken);
 
 		ResponseMessage<String> responseMessage = ResponseMessage.<String>builder()
 			.statusCode(HttpStatus.OK.value())

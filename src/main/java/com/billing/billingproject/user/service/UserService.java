@@ -52,25 +52,14 @@ public class UserService {
 		return new UserResponseDTO(saveUser);
 	}
 
-	/**
-	 * 2. 회원 활성화
-	 * @param user 활성화할 회원
-	 */
-	@Transactional
-	public void updateUserActive(User user) {
-		user.ActiveUser();
-		userRepository.save(user);
-	}
-
 
 	/**
 	 * 4. 로그아웃
 	 * @param user 로그인한 사용자의 세부 정보
 	 * @param accessToken access token
-	 * @param refreshToken refresh token
 	 */
 	@Transactional
-	public void logout(User user, String accessToken, String refreshToken) {
+	public void logout(User user, String accessToken) {
 
 		if(user == null){
 			throw new UserException("로그인되어 있는 유저가 아닙니다.");
@@ -81,6 +70,7 @@ public class UserService {
 		User existingUser = userRepository.findByEmail(user.getEmail())
 			.orElseThrow(() -> new UserException("해당 유저가 존재하지 않습니다."));
 
+		String refreshToken = existingUser.getRefreshToken();
 		existingUser.refreshTokenReset("");
 		userRepository.save(existingUser);
 
@@ -88,16 +78,6 @@ public class UserService {
 		jwtUtil.invalidateToken(refreshToken);
 	}
 
-	/**
-	 * 이메일 유효성 검사
-	 * @param email 이메일
-	 */
-	private void validateUserId(String email) {
-		Optional<User> findUser = userRepository.findByEmail(email);
-		if (findUser.isPresent()) {
-			throw new UserException("중복된 이메일 입니다.");
-		}
-	}
 
 	/**
 	 * 이메일 유효성 검사
@@ -110,10 +90,5 @@ public class UserService {
 		}
 	}
 
-	// private void checkUserType(UserType userType) {
-	// 	if (userType.equals(UserType.DEACTIVATED)) {
-	// 		throw new UserException("이미 탈퇴한 회원입니다.");
-	// 	}
-	// }
 
 }
