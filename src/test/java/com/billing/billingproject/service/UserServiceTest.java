@@ -45,6 +45,7 @@ public class UserServiceTest {
 		UserRequestDTO requestDTO = new UserRequestDTO();
 		requestDTO.setEmail("email@gmail.com");
 		requestDTO.setPassword("@@12312312test");
+		requestDTO.setUsertype(UserType.USER.toString());
 
 		//when
 		UserResponseDTO responseDTO = userService.createUser(requestDTO);
