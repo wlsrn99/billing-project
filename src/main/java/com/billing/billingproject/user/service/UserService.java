@@ -37,14 +37,16 @@ public class UserService {
 		//이메일 유효성 검사
 		validateUserEmail(requestDTO.getEmail());
 
+		UserType userType = requestDTO.getUsertype().equals("시청자") ? UserType.USER: UserType.SELEER;
+
+
 		//비밀번호 암호화
 		String password = passwordEncoder.encode(requestDTO.getPassword());
 
 		User user = User.builder()
 			.password(password)
 			.email(requestDTO.getEmail())
-			.userType(UserType.USER)
-			.statusChangedAt(LocalDateTime.now())
+			.userType(userType)
 			.build();
 
 		User saveUser = userRepository.save(user);
