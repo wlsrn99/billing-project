@@ -32,6 +32,7 @@ public class JwtUtil {
 	// Token 식별자
 	public static final String BEAR = "Bearer ";
 	// 토큰 만료시간 (30분)
+
 	private static final long TOKEN_TIME = 30 * 60 * 1000L;
 	// 리프레시 토큰 만료시간 (7일)
 	private static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
@@ -71,26 +72,19 @@ public class JwtUtil {
 
 	// 리프레시 토큰 생성
 	public String createRefreshToken(String email) {
-		return createToken(email, REFRESH_TOKEN_TIME);
+		String bearerToken =  createToken(email, REFRESH_TOKEN_TIME);
+		return bearerToken.substring(7).trim();
 	}
 
 	// header에서 JWT 가져오기
 	public String getJwtFromHeader(HttpServletRequest request) {
 		String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 		if (bearerToken != null && bearerToken.startsWith(BEAR)) {
-			return bearerToken.substring(BEAR.length());
+			return bearerToken.substring(7).trim(); // "Bearer "를 제거하고 공백 제거
 		}
 		return null;
 	}
 
-	// header에서 JWT 리프레시 토큰 가져오기
-	public String getJwtRefreshTokenFromHeader(HttpServletRequest request) {
-		String bearerToken = request.getHeader(REFRESH_HEADER);
-		if (bearerToken != null && bearerToken.startsWith(BEAR)) {
-			return bearerToken.substring(BEAR.length());
-		}
-		return null;
-	}
 
 	// 토큰 검증
 	public boolean validateToken(String token) {
@@ -132,18 +126,18 @@ public class JwtUtil {
 		}
 	}
 
-	// 토큰에서 username 가져오기
-	public String getUsernameFromToken(String token) {
-		return getUsernameFromClaims(token);
+	// 토큰에서 email 가져오기
+	public String getEmailFromToken(String token) {
+		return getEmailFromClaims(token);
 	}
 
-	// 리프레시 토큰에서 username 가져오기
-	public String getUsernameFromRefreshToken(String token) {
-		return getUsernameFromClaims(token);
+	// 리프레시 토큰에서 email 가져오기
+	public String getEmailFromRefreshToken(String token) {
+		return getEmailFromClaims(token);
 	}
 
 	// 공통 로직 분리
-	private String getUsernameFromClaims(String token) {
+	private String getEmailFromClaims(String token) {
 		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 		return claims.getSubject();
 	}
@@ -151,7 +145,7 @@ public class JwtUtil {
 	// 리프레시 토큰을 사용하여 새로운 액세스 토큰 발급
 	public String refreshAccessToken(String refreshToken) {
 		if (validateRefreshToken(refreshToken)) {
-			String email = getUsernameFromRefreshToken(refreshToken);
+			String email = getEmailFromRefreshToken(refreshToken);
 			// 여기에서 필요한 경우 사용자 역할 정보를 가져올 수 있다.
 			return createAccessToken(email); // 사용자 역할이 필요하면 두 번째 인자에 역할을 전달
 		}
@@ -167,4 +161,6 @@ public class JwtUtil {
 	private boolean isTokenBlacklisted(String token) {
 		return tokenBlacklist.contains(token);
 	}
+
+
 }

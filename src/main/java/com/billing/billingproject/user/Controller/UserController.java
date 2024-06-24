@@ -28,12 +28,6 @@ public class UserController {
 	private final UserService userService;
 	private final JwtUtil jwtUtil;
 
-	@GetMapping("/test")
-	@ResponseBody
-	public String test(){
-		return "test";
-	}
-
 	/**
 	 * 1. 회원 가입
 	 * @param requestDTO 회원 가입 요청 데이터
@@ -70,8 +64,7 @@ public class UserController {
 	public ResponseEntity<ResponseMessage<String>> logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request){
 
 		String accessToken = jwtUtil.getJwtFromHeader(request);
-		String refreshToken = jwtUtil.getJwtRefreshTokenFromHeader(request);
-		userService.logout(userDetails.getUser(), accessToken, refreshToken);
+		userService.logout(userDetails.getUser(), accessToken);
 
 		ResponseMessage<String> responseMessage = ResponseMessage.<String>builder()
 			.statusCode(HttpStatus.OK.value())

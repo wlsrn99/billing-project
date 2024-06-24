@@ -13,8 +13,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,8 +42,6 @@ public class User extends Timestamped{
 	@Enumerated(value = EnumType.STRING)
 	private UserType userType;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private LocalDateTime statusChangedAt;
 
 	@Builder
 	public User(String email, String password, String refreshToken, UserType userType,
@@ -54,12 +50,6 @@ public class User extends Timestamped{
 		this.password = password;
 		this.refreshToken = refreshToken;
 		this.userType = userType;
-		this.statusChangedAt = statusChangedAt;
-	}
-
-	//회원 상태 변경 - 인증 회원
-	public void ActiveUser() {
-		this.userType = UserType.ACTIVE;
 	}
 
 	//로그인시 리프레시 토큰 초기화

@@ -51,7 +51,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtAuthorizationFilter jwtAuthorizationFilter() {
-		return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+		return new JwtAuthorizationFilter(jwtUtil, userDetailsService, userRepository);
 	}
 
 	@Bean
@@ -66,7 +66,6 @@ public class SecurityConfig {
 				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/users/signup").permitAll()
-				.requestMatchers(HttpMethod.GET, "/api/users/test").permitAll()
 				.anyRequest().authenticated()
 		);
 
