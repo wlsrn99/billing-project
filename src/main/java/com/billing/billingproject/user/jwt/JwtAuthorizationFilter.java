@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.billing.billingproject.user.repository.UserRepository;
 import com.billing.billingproject.user.security.UserDetailsServiceImpl;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,6 +29,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
 	private final UserDetailsServiceImpl userDetailsService;
+	private final UserRepository userRepository;
 
 	// 토큰 검증
 	@Override
@@ -37,12 +39,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
 		if (StringUtils.hasText(accessToken)) {
 			try {
-				if (jwtUtil.validateToken(accessToken)) {
-					String email = jwtUtil.getUsernameFromToken(accessToken);
+				if (jwtUtil.validateToken(accessToken)) { //엑세스 토큰의 유효기간이 유효한 경우
+					String email = jwtUtil.getEmailFromToken(accessToken);
 					setAuthentication(email);
 				}
-			} catch (ExpiredJwtException e) {
-				handleExpiredAccessToken(req, res, e);
+			} catch (ExpiredJwtException e) { //엑세스 토큰의 유효기간이 다 된 경우
+				String email = e.getClaims().getSubject(); // 만료된 토큰에서 이메일 추출
+				handleExpiredAccessToken(email, req, res, e);
 			} catch (JwtException | IllegalArgumentException e) {
 				handleInvalidAccessToken(res);
 				return; // 에러 응답을 보낸 경우 필터 체인 중단
@@ -53,19 +56,18 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 	}
 
 	//리프레시 토큰 검증
-	private void handleExpiredAccessToken(HttpServletRequest req, HttpServletResponse res, ExpiredJwtException e) throws IOException {
-		String refreshToken = jwtUtil.getJwtRefreshTokenFromHeader(req);
+	private void handleExpiredAccessToken(String email, HttpServletRequest req, HttpServletResponse res, ExpiredJwtException e) throws IOException {
+		//DB에서 리프레쉬 토큰 가져오기
+		String refreshToken = userRepository.findByEmail(email).get().getRefreshToken();
 
 		if (StringUtils.hasText(refreshToken) && jwtUtil.validateRefreshToken(refreshToken)) {
-			String email = jwtUtil.getUsernameFromRefreshToken(refreshToken);
 			String newAccessToken = jwtUtil.createAccessToken(email);
 
 			res.addHeader(JwtUtil.AUTHORIZATION_HEADER, newAccessToken);
-			res.addHeader(JwtUtil.REFRESH_HEADER, refreshToken);
 
 			setAuthentication(email);
 
-			log.info("토큰 생성 완료!");
+			log.info("새로운 엑세스 토큰 생성 완료!");
 		} else {
 			sendErrorResponse(res, "유효하지 않은 리프레시 토큰입니다.");
 		}

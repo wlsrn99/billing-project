@@ -52,6 +52,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		}
 	}
 
+	//로그인 성공시
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
 		String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail();
@@ -60,12 +61,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		String refreshToken = jwtUtil.createRefreshToken(email);
 
 		User user = ((UserDetailsImpl) authResult.getPrincipal()).getUser();
+		//리프레쉬 토큰 초기화
 		user.refreshTokenReset(refreshToken);
 		userRepository.save(user);
 
 		// 응답 헤더에 토큰 추가
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
-		response.addHeader(JwtUtil.REFRESH_HEADER, refreshToken);
 
 		// JSON 응답 작성
 		writeJsonResponse(response, HttpStatus.OK, "로그인에 성공했습니다.", user.getUserType().toString());

@@ -52,11 +52,6 @@ public class User extends Timestamped{
 		this.userType = userType;
 	}
 
-	//회원 상태 변경 - 인증 회원
-	public void ActiveUser() {
-		this.userType = UserType.SELEER;
-	}
-
 	//로그인시 리프레시 토큰 초기화
 	@Transactional
 	public void refreshTokenReset(String refreshToken) {
