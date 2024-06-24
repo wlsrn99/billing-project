@@ -44,8 +44,7 @@ public class User extends Timestamped{
 
 
 	@Builder
-	public User(String email, String password, String refreshToken, UserType userType,
-		LocalDateTime statusChangedAt) {
+	public User(String email, String password, String refreshToken, UserType userType) {
 		this.email = email;
 		this.password = password;
 		this.refreshToken = refreshToken;
