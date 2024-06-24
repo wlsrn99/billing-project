@@ -12,12 +12,14 @@ import lombok.Setter;
 public class UserResponseDTO {
 	private Long id;
 	private String email;
+	private String UserType;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 
 	public UserResponseDTO(User user) {
 		this.id = user.getId();
 		this.email = user.getEmail();
+		this.UserType = user.getUserType().toString();
 		this.createdAt = user.getCreatedAt();
 		this.modifiedAt = user.getModifiedAt();
 	}

@@ -68,7 +68,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		response.addHeader(JwtUtil.REFRESH_HEADER, refreshToken);
 
 		// JSON 응답 작성
-		writeJsonResponse(response, HttpStatus.OK, "로그인에 성공했습니다.", authResult.getName());
+		writeJsonResponse(response, HttpStatus.OK, "로그인에 성공했습니다.", user.getUserType().toString());
 
 		log.info("User = {}, message = {}", email, "로그인에 성공했습니다.");
 	}

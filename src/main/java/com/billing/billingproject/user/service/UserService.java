@@ -43,7 +43,7 @@ public class UserService {
 		User user = User.builder()
 			.password(password)
 			.email(requestDTO.getEmail())
-			.userType(UserType.UNVERIFIED)
+			.userType(UserType.USER)
 			.statusChangedAt(LocalDateTime.now())
 			.build();
 
