@@ -28,12 +28,6 @@ public class UserController {
 	private final UserService userService;
 	private final JwtUtil jwtUtil;
 
-	@GetMapping("/test")
-	@ResponseBody
-	public String test(){
-		return "test";
-	}
-
 	/**
 	 * 1. 회원 가입
 	 * @param requestDTO 회원 가입 요청 데이터
