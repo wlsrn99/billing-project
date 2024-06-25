@@ -9,13 +9,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.billing.BillingProjectApplication;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
 import com.billing.user.entity.UserType;
 import com.billing.user.repository.UserRepository;
 import com.billing.user.service.UserService;
 
-@SpringBootTest
+@SpringBootTest(classes = BillingProjectApplication.class)
 @Transactional
 public class UserServiceTest {
 	@Autowired
