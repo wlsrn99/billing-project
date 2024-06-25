@@ -59,26 +59,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build and test ${{ matrix.module }}
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: >
-          ./gradlew :${{ matrix.module }}:build
-          -Dspring.datasource.url=jdbc:mysql://localhost:3305/billing
-          -Dspring.datasource.username=root
-          -Dspring.datasource.password=$MYSQL_ROOT_PASSWORD
-          -Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-      - name: Run integration tests if available
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      - name: Create module-specific application.yml
         run: |
-          if ./gradlew tasks --all | grep -q ":${{ matrix.module }}:integrationTest"; then
-            ./gradlew :${{ matrix.module }}:integrationTest \
-              -Dspring.datasource.url=jdbc:mysql://localhost:3305/billing \
-              -Dspring.datasource.username=root \
-              -Dspring.datasource.password=$MYSQL_ROOT_PASSWORD \
-              -Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+          mkdir -p ${{ matrix.module }}/src/main/resources
+          mkdir -p ${{ matrix.module }}/src/test/resources
+          if [ "${{ matrix.module }}" = "module-user" ]; then
+            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_USER_TEST_YML }}" > ${{ matrix.module }}/src/test/resources/application.yml
+          elif [ "${{ matrix.module }}" = "module-streaming" ]; then
+            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" > ${{ matrix.module }}/src/test/resources/application.yml
           else
-            echo "No integrationTest task found for ${{ matrix.module }}"
+            echo "Unknown module: ${{ matrix.module }}"
+            exit 1
           fi
+
+      - name: Build and test ${{ matrix.module }}
+        run: ./gradlew :${{ matrix.module }}:build
+
+      - name: Run integration tests
+        run: ./gradlew :${{ matrix.module }}:integrationTest
