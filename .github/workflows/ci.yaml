@@ -74,5 +74,10 @@ jobs:
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
 
-      - name: Run integration tests
-        run: ./gradlew :${{ matrix.module }}:integrationTest
+      - name: Run integration tests if available
+        run: |
+          if ./gradlew tasks --all | grep -q ":${{ matrix.module }}:integrationTest"; then
+            ./gradlew :${{ matrix.module }}:integrationTest
+          else
+            echo "No integrationTest task found for ${{ matrix.module }}"
+          fi
