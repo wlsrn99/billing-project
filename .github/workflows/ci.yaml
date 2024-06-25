@@ -81,16 +81,16 @@ jobs:
 
       - name: Run integration tests
         run: ./gradlew :${{ matrix.module }}:integrationTest
-      - name: Print application logs
-        if: always()
-        run: |
-          echo "Logs for ${{ matrix.module }}"
-          if [ -f ${{ matrix.module }}/build/reports/tests/test/index.html ]; then
-            cat ${{ matrix.module }}/build/reports/tests/test/index.html
-          fi
-          if [ -d ${{ matrix.module }}/build/reports/tests ]; then
-            find ${{ matrix.module }}/build/reports/tests -type f -name "*.log" -exec cat {} +
-          fi
-          if [ -d ${{ matrix.module }}/build/test-results ]; then
-            find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
-          fi
+#      - name: Print application logs
+#        if: always()
+#        run: |
+#          echo "Logs for ${{ matrix.module }}"
+#          if [ -f ${{ matrix.module }}/build/reports/tests/test/index.html ]; then
+#            cat ${{ matrix.module }}/build/reports/tests/test/index.html
+#          fi
+#          if [ -d ${{ matrix.module }}/build/reports/tests ]; then
+#            find ${{ matrix.module }}/build/reports/tests -type f -name "*.log" -exec cat {} +
+#          fi
+#          if [ -d ${{ matrix.module }}/build/test-results ]; then
+#            find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
+#          fi
