@@ -3,3 +3,5 @@ rootProject.name = 'billing-project'
 include(
         "module-user"
 )
+include 'module-streaming'
+
