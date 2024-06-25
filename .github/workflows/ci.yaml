@@ -33,7 +33,6 @@ jobs:
       - name: Test MySQL connection
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-#        run: docker exec mysql-container mysql -h mysql-container -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
         run: docker exec mysql-container mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
 
@@ -66,15 +65,16 @@ jobs:
           mkdir -p ${{ matrix.module }}/src/main/resources
           mkdir -p ${{ matrix.module }}/src/test/resources
           if [ "${{ matrix.module }}" = "module-user" ]; then
-            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_USER_TEST_YML }}" > ${{ matrix.module }}/src/test/resources/application.yml
+            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | cat > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_USER_TEST_YML }}" | cat > ${{ matrix.module }}/src/test/resources/application.yml
           elif [ "${{ matrix.module }}" = "module-streaming" ]; then
-            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" > ${{ matrix.module }}/src/test/resources/application.yml
+            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | cat > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | cat > ${{ matrix.module }}/src/test/resources/application.yml
           else
             echo "Unknown module: ${{ matrix.module }}"
             exit 1
           fi
+      
 
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
