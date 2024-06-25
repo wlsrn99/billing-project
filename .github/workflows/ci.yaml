@@ -65,32 +65,18 @@ jobs:
           mkdir -p ${{ matrix.module }}/src/main/resources
           mkdir -p ${{ matrix.module }}/src/test/resources
           if [ "${{ matrix.module }}" = "module-user" ]; then
-            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | cat > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_USER_TEST_YML }}" | cat > ${{ matrix.module }}/src/test/resources/application.yml
+            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
           elif [ "${{ matrix.module }}" = "module-streaming" ]; then
-            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | cat > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | cat > ${{ matrix.module }}/src/test/resources/application.yml
+            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
           else
             echo "Unknown module: ${{ matrix.module }}"
             exit 1
           fi
-      
 
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
 
       - name: Run integration tests
         run: ./gradlew :${{ matrix.module }}:integrationTest
-#      - name: Print application logs
-#        if: always()
-#        run: |
-#          echo "Logs for ${{ matrix.module }}"
-#          if [ -f ${{ matrix.module }}/build/reports/tests/test/index.html ]; then
-#            cat ${{ matrix.module }}/build/reports/tests/test/index.html
-#          fi
-#          if [ -d ${{ matrix.module }}/build/reports/tests ]; then
-#            find ${{ matrix.module }}/build/reports/tests -type f -name "*.log" -exec cat {} +
-#          fi
-#          if [ -d ${{ matrix.module }}/build/test-results ]; then
-#            find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
-#          fi
