@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '21'
+          distribution: 'temurin'
 
       - name: Set up Docker Compose
         run: docker-compose up -d
@@ -43,7 +44,7 @@ jobs:
         run: docker exec mysql-container mysql -h mysql-container -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
       - name: Cache Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
@@ -52,10 +53,17 @@ jobs:
 
       - name: Create module-specific application.yml
         run: |
-          echo "${{ secrets[matrix.module | upper]_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
+          if [ "${{ matrix.module }}" = "module-user" ]; then
+            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
+          elif [ "${{ matrix.module }}" = "module-streaming" ]; then
+            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
+          else
+            echo "Unknown module: ${{ matrix.module }}"
+            exit 1
+          fi
 
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
 
-      - name: Run integration tests
-        run: ./gradlew integrationTest
+      - name: Run integration tests for ${{ matrix.module }}
+        run: ./gradlew :${{ matrix.module }}:integrationTest
