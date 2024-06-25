@@ -61,6 +61,7 @@ jobs:
 
       - name: Create module-specific application.yml
         run: |
+          mkdir -p ${{ matrix.module }}/src/main/resources
           if [ "${{ matrix.module }}" = "module-user" ]; then
             echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" > ${{ matrix.module }}/src/main/resources/application.yml
           elif [ "${{ matrix.module }}" = "module-streaming" ]; then
