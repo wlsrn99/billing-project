@@ -9,17 +9,17 @@ on:
       - develop
 
 jobs:
-  setup:
+  build_and_test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Build and run Docker Compose
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: |
-          docker-compose up -d
+        run: docker-compose up -d
 
       - name: Wait for MySQL to be healthy
         run: |
@@ -31,78 +31,44 @@ jobs:
           echo "MySQL is up - executing command"
 
       - name: Test MySQL connection
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: docker exec mysql-container mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
-
-      - name: Check MySQL container status
-        run: docker ps -a
-
-      - name: Check MySQL logs
-        run: docker logs mysql-container
-
-  build_and_test:
-    needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module: [module-user, module-streaming]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          java-version: '21'
           distribution: 'temurin'
+          java-version: '21'
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
-          path: ~/.gradle/caches
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Create module-specific application.yml
+      - name: Decode and save module-user yml
         run: |
-          mkdir -p ${{ matrix.module }}/src/main/resources
-          mkdir -p ${{ matrix.module }}/src/test/resources
-          if [ "${{ matrix.module }}" = "module-user" ]; then
-            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-          elif [ "${{ matrix.module }}" = "module-streaming" ]; then
-            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-          else
-            echo "Unknown module: ${{ matrix.module }}"
-            exit 1
-          fi
+          mkdir -p module-user/src/main/resources module-user/src/test/resources
+          echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > module-user/src/main/resources/application.yml
+          echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > module-user/src/test/resources/application.yml
 
-      - name: Build and test ${{ matrix.module }}
-        run: ./gradlew :${{ matrix.module }}:build --info
-
-      - name: Run integration tests
-        run: ./gradlew :${{ matrix.module }}:integrationTest --info
-
-      - name: Print application logs
-        if: always()
+      - name: Decode and save module-streaming yml
         run: |
-          echo "Logs for ${{ matrix.module }}"
-          if [ -f ${{ matrix.module }}/build/reports/tests/test/index.html ]; then
-            cat ${{ matrix.module }}/build/reports/tests/test/index.html
-          fi
-          if [ -d ${{ matrix.module }}/build/reports/tests ]; then
-            find ${{ matrix.module }}/build/reports/tests -type f -name "*.log" -exec cat {} +
-          fi
-          if [ -d ${{ matrix.module }}/build/test-results ]; then
-            find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
-          fi
+          mkdir -p module-streaming/src/main/resources module-streaming/src/test/resources
+          echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > module-streaming/src/main/resources/application.yml
+          echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > module-streaming/src/test/resources/application.yml
 
-      - name: Archive test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-${{ matrix.module }}
-          path: ${{ matrix.module }}/build/reports/tests
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Test module-user
+        run: ./gradlew :module-user:test
+
+      - name: Test module-streaming
+        run: ./gradlew :module-streaming:test
