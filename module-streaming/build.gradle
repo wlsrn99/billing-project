@@ -1,9 +1,9 @@
 bootJar {
-    mainClass = 'com.billing.billingProjectApplication'
+    mainClass = 'com.billing.StremingProjectApplication'
 }
 
 springBoot {
-    mainClass = 'com.billing.billingProjectApplication'
+    mainClass = 'com.billing.StremingProjectApplication'
 }
 
 dependencies {
