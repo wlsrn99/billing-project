@@ -35,6 +35,12 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: docker exec mysql-container mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
+      - name: Check MySQL container status
+        run: docker ps -a
+
+      - name: Check MySQL logs
+        run: docker logs mysql-container
+
   build_and_test:
     needs: setup
     runs-on: ubuntu-latest
@@ -74,35 +80,11 @@ jobs:
             exit 1
           fi
 
-      - name: Verify decoded files
-        run: |
-          echo "Checking main application.yml"
-          if [ -f ${{ matrix.module }}/src/main/resources/application.yml ]; then
-            echo "File exists"
-            ls -l ${{ matrix.module }}/src/main/resources/application.yml
-            echo "Contents of main application.yml:"
-            cat ${{ matrix.module }}/src/main/resources/application.yml
-          else
-            echo "File does not exist"
-            exit 1
-          fi
-
-          echo "Checking test application.yml"
-          if [ -f ${{ matrix.module }}/src/test/resources/application.yml ]; then
-            echo "File exists"
-            ls -l ${{ matrix.module }}/src/test/resources/application.yml
-            echo "Contents of test application.yml:"
-            cat ${{ matrix.module }}/src/test/resources/application.yml
-          else
-            echo "File does not exist"
-            exit 1
-          fi
-
       - name: Build and test ${{ matrix.module }}
-        run: ./gradlew :${{ matrix.module }}:build
+        run: ./gradlew :${{ matrix.module }}:build --info
 
       - name: Run integration tests
-        run: ./gradlew :${{ matrix.module }}:integrationTest
+        run: ./gradlew :${{ matrix.module }}:integrationTest --info
 
       - name: Print application logs
         if: always()
@@ -118,9 +100,9 @@ jobs:
             find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
           fi
 
-#      - name: Archive test results
-#        if: always()
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: test-results-${{ matrix.module }}
-#          path: ${{ matrix.module }}/build/reports/tests
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.module }}
+          path: ${{ matrix.module }}/build/reports/tests
