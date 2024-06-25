@@ -17,14 +17,14 @@ jobs:
 
       - name: Build and run Docker Compose
         env:
-            MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          run: |
-            docker-compose up -d
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: |
+          docker-compose up -d
 
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
+          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
             echo "MySQL is unavailable - sleeping"
             sleep 5
           done
@@ -33,7 +33,7 @@ jobs:
       - name: Test MySQL connection
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: docker exec mysql-container mysql -h localhost -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
+        run: docker exec mysql-container mysql -h mysql-container -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
   build_and_test:
     needs: setup
