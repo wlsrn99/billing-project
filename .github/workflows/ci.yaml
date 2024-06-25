@@ -9,13 +9,35 @@ on:
       - develop
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      - name: Set up Docker Compose
+        run: docker-compose up -d
+
+      - name: Wait for MySQL to be healthy
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
+            echo "MySQL is unavailable - sleeping"
+            sleep 5
+          done
+          echo "MySQL is up - executing command"
+
+      - name: Test MySQL connection
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: docker exec mysql-container mysql -h localhost -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
+
+  build_and_test:
+    needs: setup
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         module: [module-user, module-streaming]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,23 +47,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-
-      - name: Set up Docker Compose
-        run: docker-compose up -d
-
-      - name: Wait for MySQL to be healthy
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
-            echo "MySQL is unavailable - sleeping"
-            sleep 5
-          done
-          echo "MySQL is up - executing command"
-
-      - name: Test MySQL connection
-        env:
-          MYSQL_PWD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: docker exec mysql-container mysql -h mysql-container -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -65,5 +70,5 @@ jobs:
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
 
-      - name: Run integration tests for ${{ matrix.module }}
+      - name: Run integration tests
         run: ./gradlew :${{ matrix.module }}:integrationTest
