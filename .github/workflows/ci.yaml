@@ -20,20 +20,20 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker-compose up -d
+
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-container mysqladmin ping -h "mysql-container" --silent; do
+          until docker exec mysql-container mysqladmin ping -h "localhost" --silent; do
             echo "MySQL is unavailable - sleeping"
             sleep 5
           done
           echo "MySQL is up - executing command"
+
       - name: Test MySQL connection
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-#        run: docker exec mysql-container mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
-        run: mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
-
+        run: docker exec mysql-container mysql -h localhost -P 3306 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
   build_and_test:
     needs: setup
@@ -58,6 +58,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: Create module-specific application.yml
         run: |
           mkdir -p ${{ matrix.module }}/src/main/resources
@@ -72,6 +73,7 @@ jobs:
             echo "Unknown module: ${{ matrix.module }}"
             exit 1
           fi
+
       - name: Install yamllint
         run: sudo apt-get install -y yamllint
 
@@ -81,9 +83,17 @@ jobs:
           yamllint ${{ matrix.module }}/src/test/resources/application.yml
 
       - name: Build and test ${{ matrix.module }}
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: ./gradlew :${{ matrix.module }}:build
 
       - name: Run tests
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: ./gradlew :${{ matrix.module }}:test
 
       - name: Print application logs
