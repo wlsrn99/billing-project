@@ -15,11 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build and run Docker Compose
+      - name: Set up MySQL container
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker-compose up -d
+          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:8.0
 
       - name: Wait for MySQL to be healthy
         run: |
