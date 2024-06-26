@@ -34,7 +34,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker exec mysql-container mysql -h localhost -P 3306 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+          docker exec mysql-container mysql -h localhost -P 3306 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
 
       - name: Test MySQL connection
         env:
