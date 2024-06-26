@@ -37,11 +37,14 @@ jobs:
           done
           if [ $i -eq 12 ]; then
             echo "MySQL failed to start"
+            docker logs mysql-container
             exit 1
           fi
+
       - name: Set root user privileges
         run: |
           docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
+
       - name: Test MySQL connection
         run: docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
@@ -92,23 +95,24 @@ jobs:
             exit 1
           fi
 
-#      - name: Install yamllint
-#        run: |
-#          if ! command -v yamllint &> /dev/null; then
-#            sudo apt-get install -y yamllint
-#          fi
-#
-#      - name: Verify decoded files with yamllint
-#        run: |
-#          yamllint ${{ matrix.module }}/src/main/resources/application.yml
-#          yamllint ${{ matrix.module }}/src/test/resources/application.yml
+      #      - name: Install yamllint
+      #        run: |
+      #          if ! command -v yamllint &> /dev/null; then
+      #            sudo apt-get install -y yamllint
+      #          fi
+      #
+      #      - name: Verify decoded files with yamllint
+      #        run: |
+      #          yamllint ${{ matrix.module }}/src/main/resources/application.yml
+      #          yamllint ${{ matrix.module }}/src/test/resources/application.yml
+
       - name: Build and test ${{ matrix.module }}
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker run --rm --network my_network -v ${{ github.workspace }}:/workspace -w /workspace openjdk:21 ./gradlew :${{ matrix.module }}:build --warning-mode all
+          ./gradlew :${{ matrix.module }}:build --warning-mode all
 
       - name: Run tests
         env:
@@ -116,7 +120,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker run --rm --network my_network -v ${{ github.workspace }}:/workspace -w /workspace openjdk:21 ./gradlew :${{ matrix.module }}:test --warning-mode all
+          ./gradlew :${{ matrix.module }}:test --warning-mode all
 
       - name: Print application logs
         if: always()
@@ -128,6 +132,6 @@ jobs:
           if [ -d ${{ matrix.module }}/build/reports/tests ]; then
             find ${{ matrix.module }}/build/reports/tests -type f -name "*.log" -exec cat {} +
           fi
-          if [ -d ${{ matrix.module }}/build/test-results ]; then
+          if [ -d ${{ matrix.module }}/build/test-results ]]; then
             find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
           fi
