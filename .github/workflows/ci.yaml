@@ -72,8 +72,6 @@ jobs:
           if [ "${{ matrix.module }}" = "module-user" ]; then
             echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
             echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-            echo "hibernate.dialect=org.hibernate.dialect.MySQL8Dialect" >> ${{ matrix.module }}/src/main/resources/application.yml
-            echo "hibernate.dialect=org.hibernate.dialect.MySQL8Dialect" >> ${{ matrix.module }}/src/test/resources/application.yml
             echo "User module application.yml:"
             cat ${{ matrix.module }}/src/main/resources/application.yml
             echo "User module test application.yml:"
@@ -81,8 +79,6 @@ jobs:
           elif [ "${{ matrix.module }}" = "module-streaming" ]; then
             echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
             echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-            echo "hibernate.dialect=org.hibernate.dialect.MySQL8Dialect" >> ${{ matrix.module }}/src/main/resources/application.yml
-            echo "hibernate.dialect=org.hibernate.dialect.MySQL8Dialect" >> ${{ matrix.module }}/src/test/resources/application.yml
             echo "Streaming module application.yml:"
             cat ${{ matrix.module }}/src/main/resources/application.yml
             echo "Streaming module test application.yml:"
