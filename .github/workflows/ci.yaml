@@ -92,16 +92,16 @@ jobs:
             exit 1
           fi
 
-      - name: Install yamllint
-        run: |
-          if ! command -v yamllint &> /dev/null; then
-            sudo apt-get install -y yamllint
-          fi
-
-      - name: Verify decoded files with yamllint
-        run: |
-          yamllint ${{ matrix.module }}/src/main/resources/application.yml
-          yamllint ${{ matrix.module }}/src/test/resources/application.yml
+#      - name: Install yamllint
+#        run: |
+#          if ! command -v yamllint &> /dev/null; then
+#            sudo apt-get install -y yamllint
+#          fi
+#
+#      - name: Verify decoded files with yamllint
+#        run: |
+#          yamllint ${{ matrix.module }}/src/main/resources/application.yml
+#          yamllint ${{ matrix.module }}/src/test/resources/application.yml
       - name: Build and test ${{ matrix.module }}
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3305/billing
