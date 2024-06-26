@@ -31,7 +31,8 @@ jobs:
       - name: Test MySQL connection
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: mysql -h localhost -P 3035 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
+#        run: docker exec mysql-container mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
+        run: mysql -h localhost -P 3305 -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
 
   build_and_test:
