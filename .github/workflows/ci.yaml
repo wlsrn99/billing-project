@@ -20,6 +20,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker-compose up -d
+
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
@@ -28,6 +29,7 @@ jobs:
             sleep 5
           done
           echo "MySQL is up - executing command"
+
       - name: Test MySQL connection
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
@@ -56,6 +58,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: Create module-specific application.yml
         run: |
           mkdir -p ${{ matrix.module }}/src/main/resources
@@ -69,29 +72,15 @@ jobs:
           else
             echo "Unknown module: ${{ matrix.module }}"
             exit 1
-          fi
-      - name: Verify decoded files
+
+      - name: Install yamllint
+        run: sudo apt-get install -y yamllint
+
+      - name: Verify decoded files with yamllint
         run: |
-          echo "Checking main application.yml"
-          if [ -f ${{ matrix.module }}/src/main/resources/application.yml ]; then
-            echo "File exists"
-            ls -l ${{ matrix.module }}/src/main/resources/application.yml
-            echo "Contents of main application.yml:"
-            cat ${{ matrix.module }}/src/main/resources/application.yml
-          else
-            echo "File does not exist"
-            exit 1
-          fi
-          echo "Checking test application.yml"
-          if [ -f ${{ matrix.module }}/src/test/resources/application.yml ]; then
-            echo "File exists"
-            ls -l ${{ matrix.module }}/src/test/resources/application.yml
-            echo "Contents of test application.yml:"
-            cat ${{ matrix.module }}/src/test/resources/application.yml
-          else
-            echo "File does not exist"
-            exit 1
-          fi
+          yamllint ${{ matrix.module }}/src/main/resources/application.yml
+          yamllint ${{ matrix.module }}/src/test/resources/application.yml
+
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
 
@@ -110,4 +99,3 @@ jobs:
           fi
           if [ -d ${{ matrix.module }}/build/test-results ]; then
             find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
-          fi
