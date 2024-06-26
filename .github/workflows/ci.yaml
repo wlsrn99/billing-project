@@ -100,17 +100,17 @@ jobs:
 #          yamllint ${{ matrix.module }}/src/test/resources/application.yml
       - name: Build and test ${{ matrix.module }}
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3305/billing
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: ./gradlew :${{ matrix.module }}:build
+        run: ./gradlew :${{ matrix.module }}:build --warning-mode all
 
       - name: Run tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3305/billing
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: ./gradlew :${{ matrix.module }}:test
+        run: ./gradlew :${{ matrix.module }}:test --warning-mode all
 
       - name: Print application logs
         if: always()
