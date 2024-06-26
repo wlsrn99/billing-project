@@ -17,9 +17,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create Docker network
+        run: docker network create my_network
+
       - name: Set up MySQL container
         run: |
-          docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:8.0
+          docker run -d --name mysql-container --network my_network -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} -p 3305:3306 mysql:8.0
+
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
@@ -103,14 +107,16 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: ./gradlew :${{ matrix.module }}:build --warning-mode all
+        run: |
+          docker run --rm --network my_network -v ${{ github.workspace }}:/workspace -w /workspace openjdk:21 ./gradlew :${{ matrix.module }}:build --warning-mode all
 
       - name: Run tests
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: ./gradlew :${{ matrix.module }}:test --warning-mode all
+        run: |
+          docker run --rm --network my_network -v ${{ github.workspace }}:/workspace -w /workspace openjdk:21 ./gradlew :${{ matrix.module }}:test --warning-mode all
 
       - name: Print application logs
         if: always()
