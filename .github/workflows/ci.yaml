@@ -20,7 +20,6 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker-compose up -d
-
       - name: Wait for MySQL to be healthy
         run: |
           echo "Waiting for MySQL to be ready..."
@@ -29,7 +28,6 @@ jobs:
             sleep 5
           done
           echo "MySQL is up - executing command"
-
       - name: Test MySQL connection
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
@@ -58,7 +56,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
       - name: Create module-specific application.yml
         run: |
           mkdir -p ${{ matrix.module }}/src/main/resources
@@ -72,7 +69,7 @@ jobs:
           else
             echo "Unknown module: ${{ matrix.module }}"
             exit 1
-
+          fi
       - name: Install yamllint
         run: sudo apt-get install -y yamllint
 
@@ -99,3 +96,4 @@ jobs:
           fi
           if [ -d ${{ matrix.module }}/build/test-results ]; then
             find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
+          fi
