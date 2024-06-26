@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.billing.BillingProjectApplication;
@@ -18,6 +19,7 @@ import com.billing.user.service.UserService;
 
 @SpringBootTest(classes = BillingProjectApplication.class)
 @Transactional
+@ActiveProfiles("test")
 public class UserServiceTest {
 	@Autowired
 	UserService userService;
