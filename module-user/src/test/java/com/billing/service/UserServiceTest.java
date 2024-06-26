@@ -1,4 +1,4 @@
-package com.billing.billingproject.service;
+package com.billing.service;
 
 import static org.assertj.core.api.Assertions.*;
 
