@@ -81,8 +81,8 @@ jobs:
       - name: Build and test ${{ matrix.module }}
         run: ./gradlew :${{ matrix.module }}:build
 
-      - name: Run integration tests
-        run: ./gradlew :${{ matrix.module }}:integrationTest
+      - name: Run tests
+        run: ./gradlew :${{ matrix.module }}:test
 
       - name: Print application logs
         if: always()
