@@ -9,10 +9,14 @@ on:
       - develop
 
 jobs:
-  setup:
+  build_and_test:
     runs-on: ubuntu-latest
     env:
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+    strategy:
+      matrix:
+        module: [module-user, module-streaming]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,7 +25,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker-compose up -d
+          docker-compose -f docker-compose-mysql.yml up -d   
 
       - name: Wait for MySQL to be healthy
         run: |
@@ -40,22 +44,12 @@ jobs:
             exit 1
           fi
 
-      - name: Set root user privileges
-        run: |
-          docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
+#      - name: Set root user privileges
+#        run: |
+#          docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
 
       - name: Test MySQL connection
         run: docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
-
-  build_and_test:
-    needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module: [module-user, module-streaming]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       - name: Set up JDK 21
         uses: actions/setup-java@v3
@@ -107,20 +101,18 @@ jobs:
 
       - name: Build and test ${{ matrix.module }}
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           ./gradlew :${{ matrix.module }}:build --warning-mode all
-
       - name: Run tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/billing
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           ./gradlew :${{ matrix.module }}:test --warning-mode all
-
       - name: Print application logs
         if: always()
         run: |
