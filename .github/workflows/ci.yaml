@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
     strategy:
       matrix:
         module: [module-user, module-streaming]
@@ -21,36 +22,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # MySQL 설정 및 테스트
       - name: Build and run Docker Compose
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: |
-          docker-compose -f docker-compose-mysql.yml up -d   
-
-      - name: Wait for MySQL to be healthy
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          for i in {1..12}; do
-            if docker exec billing-project_mysql_1 mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SELECT 1"; then
-              echo "MySQL is up - executing command"
-              break
-            fi
-            echo "MySQL is unavailable - sleeping"
-            sleep 5
-          done
-          if [ $i -eq 12 ]; then
-            echo "MySQL failed to start"
-            docker logs billing-project_mysql_1
-            exit 1
-          fi
-
-#      - name: Set root user privileges
-#        run: |
-#          docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
+        run: docker-compose -f docker-compose-mysql.yml up -d
 
       - name: Test MySQL connection
         run: docker exec billing-project_mysql_1 mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
+      # Java 및 Gradle 설정
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
@@ -61,68 +40,35 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ matrix.module }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-${{ matrix.module }}-
 
+      # 모듈별 설정 파일 생성
       - name: Create module-specific application.yml
         run: |
           mkdir -p ${{ matrix.module }}/src/main/resources
           mkdir -p ${{ matrix.module }}/src/test/resources
-          if [ "${{ matrix.module }}" = "module-user" ]; then
-            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-            echo "User module application.yml:"
-            cat ${{ matrix.module }}/src/main/resources/application.yml
-            echo "User module test application.yml:"
-            cat ${{ matrix.module }}/src/test/resources/application.yml
-          elif [ "${{ matrix.module }}" = "module-streaming" ]; then
-            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
-            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-            echo "Streaming module application.yml:"
-            cat ${{ matrix.module }}/src/main/resources/application.yml
-            echo "Streaming module test application.yml:"
-            cat ${{ matrix.module }}/src/test/resources/application.yml
-          else
-            echo "Unknown module: ${{ matrix.module }}"
-            exit 1
-          fi
+          app_yml_var="MODULE_${{ matrix.module | toUpper }}_APPLICATION_YML"
+          test_yml_var="MODULE_${{ matrix.module | toUpper }}_TEST_YML"
+          echo "${{ secrets[app_yml_var] }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
+          echo "${{ secrets[test_yml_var] }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
+          echo "${{ matrix.module }} module application.yml:"
+          cat ${{ matrix.module }}/src/main/resources/application.yml
+          echo "${{ matrix.module }} module test application.yml:"
+          cat ${{ matrix.module }}/src/test/resources/application.yml
 
-      #      - name: Install yamllint
-      #        run: |
-      #          if ! command -v yamllint &> /dev/null; then
-      #            sudo apt-get install -y yamllint
-      #          fi
-      #
-      #      - name: Verify decoded files with yamllint
-      #        run: |
-      #          yamllint ${{ matrix.module }}/src/main/resources/application.yml
-      #          yamllint ${{ matrix.module }}/src/test/resources/application.yml
-
-      - name: Build and test ${{ matrix.module }}
+      # 빌드 및 테스트 실행
+      - name: Build and Test ${{ matrix.module }}
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           ./gradlew :${{ matrix.module }}:build --warning-mode all
-      - name: Run tests
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: |
           ./gradlew :${{ matrix.module }}:test --warning-mode all
-      - name: Print application logs
+
+      # 정리 작업
+      - name: Stop Docker Compose
         if: always()
-        run: |
-          echo "Logs for ${{ matrix.module }}"
-          if [ -f ${{ matrix.module }}/build/reports/tests/test/index.html ]; then
-            cat ${{ matrix.module }}/build/reports/tests/test/index.html
-          fi
-          if [ -d ${{ matrix.module }}/build/reports/tests ]; then
-            find ${{ matrix.module }}/build/reports/tests -type f -name "*.log" -exec cat {} +
-          fi
-          if [ -d ${{ matrix.module }}/build/test-results ]]; then
-            find ${{ matrix.module }}/build/test-results -type f -name "*.xml" -exec cat {} +
-          fi
+        run: docker-compose -f docker-compose-mysql.yml down
