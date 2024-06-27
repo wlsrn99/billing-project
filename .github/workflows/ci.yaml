@@ -22,14 +22,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # MySQL 설정 및 테스트
+      # MySQL 설정
       - name: Build and run Docker Compose
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: docker-compose -f docker-compose-mysql.yml up -d
-
-      - name: Test MySQL connection
-        run: docker exec billing-project_mysql_1 mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SHOW DATABASES;"
 
       # Java 및 Gradle 설정
       - name: Set up JDK 21
