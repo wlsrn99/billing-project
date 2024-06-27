@@ -2,4 +2,6 @@ rootProject.name = 'billing-project'
 
 include "module-user"
 include 'module-streaming'
+include 'module-gateway'
+include 'module-discovery'
 

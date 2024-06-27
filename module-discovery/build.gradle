@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.1'
+    id 'io.spring.dependency-management' version '1.1.5'
+}
+springBoot {
+    mainClass = 'com.billing.DiscoveryModuleApplication'
+}
+group = 'com.billing'
+version = '0.0.1-SNAPSHOT'
+java {
+    sourceCompatibility = '21'
+}
+repositories {
+    mavenCentral()
+}
+
+
+
+dependencies {
+    //유레카 서버
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.0.5'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+}
+tasks.named('test') {
+    useJUnitPlatform()
+}
