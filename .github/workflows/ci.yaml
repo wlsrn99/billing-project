@@ -24,6 +24,8 @@ jobs:
 
       # MySQL 설정 및 테스트
       - name: Build and run Docker Compose
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: docker-compose -f docker-compose-mysql.yml up -d
 
       - name: Test MySQL connection
@@ -40,35 +42,44 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ matrix.module }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-${{ matrix.module }}-
+            ${{ runner.os }}-gradle-
 
       # 모듈별 설정 파일 생성
       - name: Create module-specific application.yml
         run: |
           mkdir -p ${{ matrix.module }}/src/main/resources
           mkdir -p ${{ matrix.module }}/src/test/resources
-          app_yml_var="MODULE_${{ matrix.module | toUpper }}_APPLICATION_YML"
-          test_yml_var="MODULE_${{ matrix.module | toUpper }}_TEST_YML"
-          echo "${{ secrets[app_yml_var] }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
-          echo "${{ secrets[test_yml_var] }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
-          echo "${{ matrix.module }} module application.yml:"
-          cat ${{ matrix.module }}/src/main/resources/application.yml
-          echo "${{ matrix.module }} module test application.yml:"
-          cat ${{ matrix.module }}/src/test/resources/application.yml
+          if [ "${{ matrix.module }}" = "module-user" ]; then
+            echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
+            echo "User module application.yml:"
+            cat ${{ matrix.module }}/src/main/resources/application.yml
+            echo "User module test application.yml:"
+            cat ${{ matrix.module }}/src/test/resources/application.yml
+          elif [ "${{ matrix.module }}" = "module-streaming" ]; then
+            echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > ${{ matrix.module }}/src/main/resources/application.yml
+            echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > ${{ matrix.module }}/src/test/resources/application.yml
+            echo "Streaming module application.yml:"
+            cat ${{ matrix.module }}/src/main/resources/application.yml
+            echo "Streaming module test application.yml:"
+            cat ${{ matrix.module }}/src/test/resources/application.yml
+          else
+            echo "Unknown module: ${{ matrix.module }}"
+            exit 1
 
       # 빌드 및 테스트 실행
-      - name: Build and Test ${{ matrix.module }}
+      - name: Build ${{ matrix.module }}
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-        run: |
-          ./gradlew :${{ matrix.module }}:build --warning-mode all
-          ./gradlew :${{ matrix.module }}:test --warning-mode all
+        run: ./gradlew :${{ matrix.module }}:build --warning-mode all
 
-      # 정리 작업
-      - name: Stop Docker Compose
-        if: always()
-        run: docker-compose -f docker-compose-mysql.yml down
+      - name: Run tests ${{ matrix.module }}
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3305/billing
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: ./gradlew :${{ matrix.module }}:test --warning-mode all
