@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  module-streaming:
+    image: wlsrn331/module-streaming:latest
+    ports:
+      - "8081:8081"
+    networks:
+      - my_network
+
+  module-user:
+    image: wlsrn331/module-user:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

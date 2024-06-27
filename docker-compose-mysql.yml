@@ -1,0 +1,19 @@
+# docker-compose -f docker-compose-mysql.yml up -d
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8
+    environment:
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: billing
+    ports:
+      - "3305:3306"
+    networks:
+      - my_network
+    volumes:
+      - ./my.cnf:/etc/mysql/my.cnf
+
+networks:
+  my_network:
+    driver: bridge

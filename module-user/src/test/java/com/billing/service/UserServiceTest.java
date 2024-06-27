@@ -1,4 +1,4 @@
-package com.billing.billingproject.service;
+package com.billing.service;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -7,16 +7,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.billing.BillingProjectApplication;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
 import com.billing.user.entity.UserType;
 import com.billing.user.repository.UserRepository;
 import com.billing.user.service.UserService;
 
-@SpringBootTest
+@SpringBootTest(classes = BillingProjectApplication.class)
 @Transactional
+@ActiveProfiles("test")
 public class UserServiceTest {
 	@Autowired
 	UserService userService;
