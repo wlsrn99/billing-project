@@ -2,10 +2,12 @@ package com.streaming;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-public class StremingProjectApplication {
+@EnableDiscoveryClient
+public class StremingModuleApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(StremingProjectApplication.class, args);
+		SpringApplication.run(StremingModuleApplication.class, args);
 	}
 }

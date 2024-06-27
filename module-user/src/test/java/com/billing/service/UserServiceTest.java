@@ -10,14 +10,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.billing.BillingProjectApplication;
+import com.billing.UserModuleApplication;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
 import com.billing.user.entity.UserType;
 import com.billing.user.repository.UserRepository;
 import com.billing.user.service.UserService;
 
-@SpringBootTest(classes = BillingProjectApplication.class)
+@SpringBootTest(classes = UserModuleApplication.class)
 @Transactional
 @ActiveProfiles("test")
 public class UserServiceTest {
