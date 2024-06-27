@@ -31,7 +31,7 @@ jobs:
         run: |
           echo "Waiting for MySQL to be ready..."
           for i in {1..12}; do
-            if docker exec mysql-container mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SELECT 1"; then
+            if docker exec billing-project-mysql-1 mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SELECT 1"; then
               echo "MySQL is up - executing command"
               break
             fi
