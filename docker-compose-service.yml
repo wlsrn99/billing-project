@@ -1,3 +1,4 @@
+# docker-compose -f docker-compose-service.yml up -d
 version: '3.8'
 services:
   module-streaming:
