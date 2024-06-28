@@ -25,13 +25,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 	private final JwtUtil jwtUtil;
 
-	private final UserRepository userRepository;
-
-
 	public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository) {
 		this.jwtUtil = jwtUtil;
-		this.userRepository = userRepository;
-		setFilterProcessesUrl("/api/users/login");
 	}
 
 	@Override
@@ -58,35 +53,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail();
 
 		String accessToken = jwtUtil.createAccessToken(email);
-		String refreshToken = jwtUtil.createRefreshToken(email);
-
-		User user = ((UserDetailsImpl) authResult.getPrincipal()).getUser();
-		//리프레쉬 토큰 초기화
-		user.refreshTokenReset(refreshToken);
-		userRepository.save(user);
 
 		// 응답 헤더에 토큰 추가
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
-
-		// JSON 응답 작성
-		writeJsonResponse(response, HttpStatus.OK, "로그인에 성공했습니다.", user.getUserType().toString());
-
 		log.info("User = {}, message = {}", email, "로그인에 성공했습니다.");
 	}
 
-	private void writeJsonResponse(HttpServletResponse response, HttpStatus status, String message, String data) throws IOException {
-		ResponseMessage<String> responseMessage = ResponseMessage.<String>builder()
-			.statusCode(status.value())
-			.message(message)
-			.data(data)
-			.build();
-
-		String jsonResponse = new ObjectMapper().writeValueAsString(responseMessage);
-		response.setStatus(status.value());
-		response.setContentType("application/json; charset=UTF-8");
-		response.getWriter().write(jsonResponse);
-		response.getWriter().flush();
-	}
 
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {

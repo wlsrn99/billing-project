@@ -1,5 +1,6 @@
 package com.billing.user.Controller;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.billing.user.dto.LoginRequestDTO;
+import com.billing.user.dto.LoginResponseDTO;
 import com.billing.user.dto.ResponseMessage;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
@@ -46,6 +49,23 @@ public class UserController {
 			.build();
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseMessage);
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<ResponseMessage<LoginResponseDTO>> loginUser(@RequestBody LoginRequestDTO requestDTO) {
+		LoginResponseDTO responseDTO = userService.login(requestDTO.getEmail(), requestDTO.getPassword());
+
+		String accessToken = jwtUtil.createAccessToken(requestDTO.getEmail());
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(jwtUtil.AUTHORIZATION_HEADER, accessToken);
+
+		ResponseMessage<LoginResponseDTO> responseMessage = ResponseMessage.<LoginResponseDTO>builder()
+			.statusCode(HttpStatus.OK.value())
+			.message("로그인이 완료되었습니다.")
+			.data(responseDTO)
+			.build();
+
+		return ResponseEntity.status(HttpStatus.OK).headers(headers).body(responseMessage);
 	}
 
 
