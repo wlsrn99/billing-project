@@ -1,6 +1,4 @@
-package com.billing.Exception;
-
-import com.billing.common.exception.GlobalException;
+package com.billing.exception;
 
 public class UserException extends GlobalException {
 
@@ -19,20 +17,14 @@ public class UserException extends GlobalException {
 			super(errorCode);}
 	}
 
-	public static class UserDuplicatedException extends UserException {
-		public UserDuplicatedException(final UserErrorCode errorCode) {
+	public static class EmailDuplicatedException extends UserException {
+		public EmailDuplicatedException(final UserErrorCode errorCode) {
 			super(errorCode);
 		}
 	}
 
 	public static class UserNotFoundException extends UserException {
 		public UserNotFoundException(final UserErrorCode errorCode) {
-			super(errorCode);
-		}
-	}
-
-	public static class ProfileNotFoundException extends UserException {
-		public ProfileNotFoundException(final UserErrorCode errorCode) {
 			super(errorCode);
 		}
 	}

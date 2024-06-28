@@ -19,7 +19,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return null; // 권한을 설정하는 경우 여기에 로직 추가
+		return null;
 	}
 
 	@Override
