@@ -63,6 +63,7 @@ public class UserService {
 			throw new IllegalArgumentException("Invalid email or password");
 		}
 
+		//리프레쉬 토큰 생성
 		String refreshToken = jwtUtil.createRefreshToken(email);
 		user.refreshTokenReset(refreshToken);
 		User saveUser = userRepository.save(user);

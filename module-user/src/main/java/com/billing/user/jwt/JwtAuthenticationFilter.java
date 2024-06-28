@@ -56,7 +56,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 		// 응답 헤더에 토큰 추가
 		response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
-		log.info("User = {}, message = {}", email, "로그인에 성공했습니다.");
 	}
 
 
