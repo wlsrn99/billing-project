@@ -1,18 +1,21 @@
 package com.billing.user.service;
 
 
+import static com.billing.exception.UserException.*;
+
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.billing.exception.UserErrorCode;
 import com.billing.user.dto.LoginResponseDTO;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
 import com.billing.user.entity.User;
 import com.billing.user.entity.UserType;
-import com.billing.user.exception.UserException;
 import com.billing.user.jwt.JwtUtil;
 import com.billing.user.repository.UserRepository;
 
@@ -57,12 +60,13 @@ public class UserService {
 	@Transactional
 	public LoginResponseDTO login(String email, String password){
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new IllegalArgumentException("Invalid email"));
+			.orElseThrow(() -> new InvalidEmailException(UserErrorCode.INVALID_EMAIL_ERROR));
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw new IllegalArgumentException("Invalid email or password");
+			throw new InvalidPasswordException(UserErrorCode.INVALID_PASSWORD_ERROR);
 		}
 
+		//리프레쉬 토큰 생성
 		String refreshToken = jwtUtil.createRefreshToken(email);
 		user.refreshTokenReset(refreshToken);
 		User saveUser = userRepository.save(user);
@@ -72,20 +76,18 @@ public class UserService {
 
 	/**
 	 * 3. 로그아웃
-	 * @param user 로그인한 사용자의 세부 정보
+	 * @param email 로그인한 사용자의 이메일
 	 * @param accessToken access token
 	 */
 	@Transactional
-	public void logout(User user, String accessToken) {
+	public void logout(String email, String accessToken) {
 
-		if(user == null){
-			throw new UserException("로그인되어 있는 유저가 아닙니다.");
+		if(email == null){
+			throw new UserUnauthorizedException(UserErrorCode.UNAUTHORIZED_ACCESS_ERROR);
 		}
 
-		// checkUserType(user.getUserType());
-
-		User existingUser = userRepository.findByEmail(user.getEmail())
-			.orElseThrow(() -> new UserException("해당 유저가 존재하지 않습니다."));
+		User existingUser = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserNotFoundException(UserErrorCode.USER_NOT_FOUND));
 
 		String refreshToken = existingUser.getRefreshToken();
 		existingUser.refreshTokenReset("");
@@ -93,6 +95,15 @@ public class UserService {
 
 		jwtUtil.invalidateToken(accessToken);
 		jwtUtil.invalidateToken(refreshToken);
+	}
+
+	public ResponseEntity<String> getNewToken(String oldToken) {
+		// 토큰 갱신 로직을 호출
+		String email = jwtUtil.getEmailFromToken(oldToken);
+		User user  = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UserNotFoundException(UserErrorCode.USER_NOT_FOUND));
+		String newToken = jwtUtil.refreshAccessToken(user.getRefreshToken());
+		return ResponseEntity.ok(newToken);
 	}
 
 
@@ -103,7 +114,7 @@ public class UserService {
 	private void validateUserEmail(String email) {
 		Optional<User> findUser = userRepository.findByEmail(email);
 		if(findUser.isPresent()) {
-			throw new UserException("중복된 Email 입니다.");
+			throw new EmailDuplicatedException(UserErrorCode.EMAIL_DUPLICATED);
 		}
 	}
 
