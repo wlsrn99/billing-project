@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.billing.user.dto.LoginResponseDTO;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
 import com.billing.user.entity.User;
@@ -53,9 +54,24 @@ public class UserService {
 		return new UserResponseDTO(saveUser);
 	}
 
+	@Transactional
+	public LoginResponseDTO login(String email, String password){
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("Invalid email"));
+
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+			throw new IllegalArgumentException("Invalid email or password");
+		}
+
+		String refreshToken = jwtUtil.createRefreshToken(email);
+		user.refreshTokenReset(refreshToken);
+		User saveUser = userRepository.save(user);
+
+		return new LoginResponseDTO(saveUser);
+	}
 
 	/**
-	 * 4. 로그아웃
+	 * 3. 로그아웃
 	 * @param user 로그인한 사용자의 세부 정보
 	 * @param accessToken access token
 	 */
