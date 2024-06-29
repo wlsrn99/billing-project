@@ -28,12 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtUtil {
 	// Header KEY 값
 	public static final String AUTHORIZATION_HEADER = "Authorization";
-	// 리프레시 헤더 값
-	public static final String REFRESH_HEADER = "RefreshToken";
 	// Token 식별자
 	public static final String BEAR = "Bearer ";
 	// 토큰 만료시간 (30분)
-
 	private static final long TOKEN_TIME = 30 * 60 * 1000L;
 	// 리프레시 토큰 만료시간 (7일)
 	private static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
@@ -61,7 +58,8 @@ public class JwtUtil {
 			.setSubject(subject)
 			.setIssuedAt(now)
 			.setExpiration(expiryDate)
-			.signWith(key, signatureAlgorithm);
+			.signWith(key, signatureAlgorithm)
+			.claim("roles", roles);
 
 		return BEAR + builder.compact();
 	}
@@ -73,7 +71,7 @@ public class JwtUtil {
 
 	// 리프레시 토큰 생성
 	public String createRefreshToken(String email, List<String> roles) {
-		String bearerToken =  createToken(email, REFRESH_TOKEN_TIME,roles);
+		String bearerToken = createToken(email, REFRESH_TOKEN_TIME, roles);
 		return bearerToken.substring(7).trim();
 	}
 
@@ -85,7 +83,6 @@ public class JwtUtil {
 		}
 		return null;
 	}
-
 
 	// 토큰 검증
 	public boolean validateToken(String token) {
@@ -121,7 +118,7 @@ public class JwtUtil {
 		} catch (IllegalArgumentException e) {
 			log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.", e);
 			throw e;
-		} catch (Exception e){
+		} catch (Exception e) {
 			log.error("잘못되었습니다.", e);
 			throw e;
 		}
@@ -170,6 +167,5 @@ public class JwtUtil {
 	private boolean isTokenBlacklisted(String token) {
 		return tokenBlacklist.contains(token);
 	}
-
 
 }
