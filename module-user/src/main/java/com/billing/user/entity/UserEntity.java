@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "users")
-public class User extends Timestamped{
+public class UserEntity extends Timestamped{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class User extends Timestamped{
 
 
 	@Builder
-	public User(String email, String password, String refreshToken, UserType userType) {
+	public UserEntity(String email, String password, String refreshToken, UserType userType) {
 		this.email = email;
 		this.password = password;
 		this.refreshToken = refreshToken;

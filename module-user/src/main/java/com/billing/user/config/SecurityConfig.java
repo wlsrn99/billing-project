@@ -42,16 +42,20 @@ public class SecurityConfig {
 		http.sessionManagement(
 			sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-		//경로별 인가
-		http.authorizeHttpRequests(
-			requests -> requests.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
-				.permitAll()
-				.requestMatchers(HttpMethod.POST, "/user/api/login")
-				.permitAll()
-				.requestMatchers(HttpMethod.POST, "/user/api/signup")
-				.permitAll()
-				.anyRequest()
-				.authenticated());
+		// //경로별 인가
+		// http.authorizeHttpRequests(
+		// 	requests -> requests.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+		// 		.permitAll()
+		// 		.requestMatchers(HttpMethod.POST, "/user/api/login")
+		// 		.permitAll()
+		// 		.requestMatchers(HttpMethod.POST, "/user/api/signup")
+		// 		.permitAll()
+		// 		.anyRequest()
+		// 		.authenticated());
+
+		//경로별 인가 작업
+		http.authorizeHttpRequests((auth) -> auth
+			.anyRequest().permitAll());
 
 		return http.build();
 	}

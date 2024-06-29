@@ -1,10 +1,16 @@
 package com.billing.user.Controller;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,13 +25,17 @@ import com.billing.user.dto.UserResponseDTO;
 import com.billing.user.jwt.JwtUtil;
 import com.billing.user.service.UserService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user/api")
+@Slf4j
 public class UserController {
 	private final UserService userService;
 	private final JwtUtil jwtUtil;
@@ -53,16 +63,17 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ResponseMessage<LoginResponseDTO>> loginUser(@RequestBody LoginRequestDTO requestDTO) {
-		LoginResponseDTO responseDTO = userService.login(requestDTO.getEmail(), requestDTO.getPassword());
+		LoginResponseDTO response = userService.login(requestDTO.getEmail(), requestDTO.getPassword());
 
-		String accessToken = jwtUtil.createAccessToken(requestDTO.getEmail());
+		String accessToken = response.getAccessToken();
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(jwtUtil.AUTHORIZATION_HEADER, accessToken);
 
 		ResponseMessage<LoginResponseDTO> responseMessage = ResponseMessage.<LoginResponseDTO>builder()
 			.statusCode(HttpStatus.OK.value())
 			.message("로그인이 완료되었습니다.")
-			.data(responseDTO)
+			.data(response)
 			.build();
 
 		return ResponseEntity.status(HttpStatus.OK).headers(headers).body(responseMessage);
@@ -95,19 +106,27 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
 	}
 
-	// 토큰을 통해 id 제공 - 다른 서비스에서 요청할 데이터
+	// 이용자 email을 통해 새로운 access 토큰 제공 - 다른 모듈 서비스에서 요청할 데이터
 	@PostMapping("/refresh")
-	public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String oldToken) {
+	public String getNewAccessToken(@RequestHeader("email") String email) {
 		try {
-			return userService.getNewToken(oldToken);
-		} catch (Exception e) {
-			// 갱신 실패 시 에러 응답
-			ResponseMessage<String> errorMessage = ResponseMessage.<String>builder()
-				.statusCode(HttpStatus.OK.value())
-				.message("토큰 갱신에 실패 하였습니다")
-				.build();
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
+			log.info("oldToken: {}", email);
+			String newToken = userService.getNewToken(email);
+			log.error("신규 발급 토큰 : {}", newToken);
+			return newToken; // 갱신된 토큰을 반환.
 		}
+		catch (ExpiredJwtException e) {
+			return "expired token";
+		}
+		catch (JwtException | IllegalArgumentException e) {
+			// 갱신 실패 시 에러 응답
+			return "Token refresh failed!!!";
+		}
+	}
+
+	@GetMapping("/{userEmail}")
+	public UserDetails getUserInfoByUserId(@PathVariable String userEmail) {
+		return userService.getUserDetails(userEmail);
 	}
 
 

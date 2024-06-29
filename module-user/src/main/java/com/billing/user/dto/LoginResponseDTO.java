@@ -1,7 +1,5 @@
 package com.billing.user.dto;
 
-import com.billing.user.entity.User;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,10 +7,10 @@ import lombok.Setter;
 @Setter
 public class LoginResponseDTO {
 	private String email;
-	private String userType;
+	private String accessToken;
 
-	public LoginResponseDTO(User user) {
-		this.email = user.getEmail();
-		this.userType = user.getUserType().toString();
+	public LoginResponseDTO(String email, String accessToken) {
+		this.email = email;
+		this.accessToken = accessToken;
 	}
 }
