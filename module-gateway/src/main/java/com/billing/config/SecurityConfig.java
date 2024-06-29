@@ -8,7 +8,8 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
-import com.billing.filter.JwtAuthenticationFilter;
+import com.billing.filter.FailedAuthenticationEntryPoint;
+import com.billing.filter.JwtAuthorizationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +17,8 @@ import lombok.RequiredArgsConstructor;
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final JwtAuthorizationFilter jwtAuthorizationFilter;
+	private final FailedAuthenticationEntryPoint authenticationEntryPoint;
 
 	@Bean
 	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -26,8 +28,13 @@ public class SecurityConfig {
 			.httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
 			.authorizeExchange(exchanges -> exchanges
 				.pathMatchers("/users/**").permitAll()
+				.pathMatchers("/streamings/**").permitAll()
 				.anyExchange().authenticated())
-			.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION);
+			.addFilterAt(jwtAuthorizationFilter, SecurityWebFiltersOrder.AUTHORIZATION);
+
+		// 예외처리 발생 시 반환 세팅
+		http.exceptionHandling(exceptionHandling -> exceptionHandling
+			.authenticationEntryPoint(authenticationEntryPoint));
 
 		return http.build();
 	}

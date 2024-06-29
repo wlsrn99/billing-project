@@ -20,7 +20,7 @@ import com.billing.user.service.UserService;
 @SpringBootTest(classes = UserModuleApplication.class)
 @Transactional
 @ActiveProfiles("test")
-public class UserServiceTest {
+public class UserEntityServiceTest {
 	@Autowired
 	UserService userService;
 
@@ -32,7 +32,7 @@ public class UserServiceTest {
 
 	// @BeforeEach
 	// void setUp(){
-	// 	User user = User.builder()
+	// 	UserEntity user = UserEntity.builder()
 	// 		.email("email@email.com")
 	// 		.password(passwordEncoder.encode("@@1234123password"))
 	// 		.userType(UserType.UNVERIFIED)

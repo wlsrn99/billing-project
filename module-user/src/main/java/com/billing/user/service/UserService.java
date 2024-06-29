@@ -3,9 +3,15 @@ package com.billing.user.service;
 
 import static com.billing.exception.UserException.*;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +20,7 @@ import com.billing.exception.UserErrorCode;
 import com.billing.user.dto.LoginResponseDTO;
 import com.billing.user.dto.UserRequestDTO;
 import com.billing.user.dto.UserResponseDTO;
-import com.billing.user.entity.User;
+import com.billing.user.entity.UserEntity;
 import com.billing.user.entity.UserType;
 import com.billing.user.jwt.JwtUtil;
 import com.billing.user.repository.UserRepository;
@@ -46,32 +52,36 @@ public class UserService {
 		//비밀번호 암호화
 		String password = passwordEncoder.encode(requestDTO.getPassword());
 
-		User user = User.builder()
+		UserEntity userEntity = UserEntity.builder()
 			.password(password)
 			.email(requestDTO.getEmail())
 			.userType(userType)
 			.build();
 
-		User saveUser = userRepository.save(user);
+		UserEntity saveUserEntity = userRepository.save(userEntity);
 
-		return new UserResponseDTO(saveUser);
+		return new UserResponseDTO(saveUserEntity);
 	}
 
 	@Transactional
 	public LoginResponseDTO login(String email, String password){
-		User user = userRepository.findByEmail(email)
+		UserEntity userEntity = userRepository.findByEmail(email)
 			.orElseThrow(() -> new InvalidEmailException(UserErrorCode.INVALID_EMAIL_ERROR));
 
-		if (!passwordEncoder.matches(password, user.getPassword())) {
+		if (!passwordEncoder.matches(password, userEntity.getPassword())) {
 			throw new InvalidPasswordException(UserErrorCode.INVALID_PASSWORD_ERROR);
 		}
 
-		//리프레쉬 토큰 생성
-		String refreshToken = jwtUtil.createRefreshToken(email);
-		user.refreshTokenReset(refreshToken);
-		User saveUser = userRepository.save(user);
+		//리프레쉬 토큰 생성, DB에 저장
+		String refreshToken = jwtUtil.createRefreshToken(email, Collections.singletonList(userEntity.getUserType().getAuthority()));
+		userEntity.refreshTokenReset(refreshToken);
+		UserEntity saveUserEntity = userRepository.save(userEntity);
 
-		return new LoginResponseDTO(saveUser);
+		String accessToken = jwtUtil.createAccessToken(email, Collections.singletonList(userEntity.getUserType().getAuthority()));
+		LoginResponseDTO loginResponseDTO = new LoginResponseDTO(email,accessToken);
+
+
+		return loginResponseDTO;
 	}
 
 	/**
@@ -86,24 +96,34 @@ public class UserService {
 			throw new UserUnauthorizedException(UserErrorCode.UNAUTHORIZED_ACCESS_ERROR);
 		}
 
-		User existingUser = userRepository.findByEmail(email)
+		UserEntity existingUserEntity = userRepository.findByEmail(email)
 			.orElseThrow(() -> new UserNotFoundException(UserErrorCode.USER_NOT_FOUND));
 
-		String refreshToken = existingUser.getRefreshToken();
-		existingUser.refreshTokenReset("");
-		userRepository.save(existingUser);
+		String refreshToken = existingUserEntity.getRefreshToken();
+		existingUserEntity.refreshTokenReset("");
+		userRepository.save(existingUserEntity);
 
 		jwtUtil.invalidateToken(accessToken);
 		jwtUtil.invalidateToken(refreshToken);
 	}
 
-	public ResponseEntity<String> getNewToken(String oldToken) {
-		// 토큰 갱신 로직을 호출
-		String email = jwtUtil.getEmailFromToken(oldToken);
-		User user  = userRepository.findByEmail(email)
-			.orElseThrow(() -> new UserNotFoundException(UserErrorCode.USER_NOT_FOUND));
-		String newToken = jwtUtil.refreshAccessToken(user.getRefreshToken());
-		return ResponseEntity.ok(newToken);
+	public String getNewToken(String email) {
+		UserEntity userEntity = userRepository.findByEmail(email)
+			.orElseThrow(() -> new UsernameNotFoundException("refresh UserEntity Not Found" + email));
+
+		String newToken = jwtUtil.refreshAccessToken(userEntity.getRefreshToken());
+		return newToken;
+	}
+
+	public UserDetails getUserDetails(String userEmail) {
+		// 사용자 정보를 DB 에서 조회
+		UserEntity userEntity = userRepository.findByEmail(userEmail).get();
+
+		// UserDetails 객체로 변환하여 반환
+		return new User(
+			userEntity.getEmail(),
+			userEntity.getPassword(),
+			Collections.singletonList(new SimpleGrantedAuthority(userEntity.getUserType().getAuthority())));
 	}
 
 
@@ -112,7 +132,7 @@ public class UserService {
 	 * @param email 이메일
 	 */
 	private void validateUserEmail(String email) {
-		Optional<User> findUser = userRepository.findByEmail(email);
+		Optional<UserEntity> findUser = userRepository.findByEmail(email);
 		if(findUser.isPresent()) {
 			throw new EmailDuplicatedException(UserErrorCode.EMAIL_DUPLICATED);
 		}

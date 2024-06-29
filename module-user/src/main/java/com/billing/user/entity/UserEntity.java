@@ -1,4 +1,4 @@
-package com.billing.entity;
+package com.billing.user.entity;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "users")
-public class User extends Timestamped{
+public class UserEntity extends Timestamped{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class User extends Timestamped{
 
 
 	@Builder
-	public User(String email, String password, String refreshToken, UserType userType) {
+	public UserEntity(String email, String password, String refreshToken, UserType userType) {
 		this.email = email;
 		this.password = password;
 		this.refreshToken = refreshToken;
@@ -50,6 +50,7 @@ public class User extends Timestamped{
 	}
 
 	//로그인시 리프레시 토큰 초기화
+	@Transactional
 	public void refreshTokenReset(String refreshToken) {
 		this.refreshToken = refreshToken;
 	}
