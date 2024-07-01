@@ -7,10 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
+import com.streaming.dto.SaveResponseDTO;
 import com.streaming.dto.VideoRequest;
-import com.streaming.entity.Video;
 import com.streaming.entity.WatcheHistory;
 import com.streaming.service.StreamingService;
 
@@ -23,8 +22,8 @@ public class StreamingContoller {
 	private final StreamingService streamingService;
 
 	@GetMapping("/{videoId}/play")
-	public ResponseEntity<Video> playVideo(@RequestBody VideoRequest request, @PathVariable Long videoId) {
-		Video video = streamingService.playVideo(request.getUserId(), videoId);
+	public ResponseEntity<SaveResponseDTO> playVideo(@RequestBody VideoRequest request, @PathVariable Long videoId) {
+		SaveResponseDTO video = streamingService.playVideo(request.getUserId(), videoId);
 		return ResponseEntity.ok(video);
 	}
 
