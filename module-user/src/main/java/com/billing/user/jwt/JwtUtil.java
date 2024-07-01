@@ -50,7 +50,7 @@ public class JwtUtil {
 	}
 
 	// 토큰 생성 공통 로직
-	private String createToken(String subject, long expirationTime, List<String> roles) {
+	private String createToken(String subject, long expirationTime, List<String> roles, Long userId) {
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + expirationTime);
 
@@ -59,19 +59,20 @@ public class JwtUtil {
 			.setIssuedAt(now)
 			.setExpiration(expiryDate)
 			.signWith(key, signatureAlgorithm)
-			.claim("roles", roles);
+			.claim("roles", roles)
+			.claim("userId", userId);
 
 		return BEAR + builder.compact();
 	}
 
 	// 액세스 토큰 생성
-	public String createAccessToken(String email, List<String> roles) {
-		return createToken(email, TOKEN_TIME, roles);
+	public String createAccessToken(String email, List<String> roles, Long userId) {
+		return createToken(email, TOKEN_TIME, roles, userId);
 	}
 
 	// 리프레시 토큰 생성
-	public String createRefreshToken(String email, List<String> roles) {
-		String bearerToken = createToken(email, REFRESH_TOKEN_TIME, roles);
+	public String createRefreshToken(String email, List<String> roles, Long userId) {
+		String bearerToken = createToken(email, REFRESH_TOKEN_TIME, roles, userId);
 		return bearerToken.substring(7).trim();
 	}
 
@@ -140,6 +141,12 @@ public class JwtUtil {
 		return claims.get("roles", List.class);
 	}
 
+	// 토큰에서 userId 가져오기
+	public Long getUserIdFromToken(String token){
+		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+		return claims.get("userId", Long.class);
+	}
+
 	// 공통 로직 분리
 	private String getEmailFromClaims(String token) {
 		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
@@ -152,8 +159,10 @@ public class JwtUtil {
 			String email = getEmailFromRefreshToken(refreshToken);
 
 			List<String> roles = getRolesFromRefreshToken(refreshToken);
-			// 여기에서 필요한 경우 사용자 역할 정보를 가져올 수 있다.
-			return createAccessToken(email, roles); // 사용자 역할이 필요하면 두 번째 인자에 역할을 전달
+
+			Long userId = getUserIdFromToken(refreshToken);
+
+			return createAccessToken(email, roles,userId);
 		}
 		return null;
 	}

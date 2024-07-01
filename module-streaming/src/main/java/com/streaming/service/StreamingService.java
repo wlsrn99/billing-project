@@ -52,7 +52,7 @@ public class StreamingService {
 		watcheHistory.clearLastPlayTime(LocalDateTime.now());
 		watchedHistoryRepository.save(watcheHistory);
 
-		return new SaveResponseDTO(video);
+		return new SaveResponseDTO(video, watcheHistory.getLastWatchedPosition());
 	}
 
 	@Transactional
@@ -70,10 +70,18 @@ public class StreamingService {
 		watcheHistory.clearLastPlayTime(null);
 		//현재 시점에서 정지 버튼을 누른 지점
 		int endWatched = watcheHistory.getLastWatchedPosition();
-
 		Video video = videoRepository.findById(videoId).get();
+
+		//정지 버튼을 누른 지점이 영상의 길이보다 크다면 원래 영상 길이로 초기화
+		if(endWatched >= video.getDuration()){
+			watcheHistory.resetWatchedPosition(video.getDuration());
+			endWatched = watcheHistory.getLastWatchedPosition();
+		}
+
 		//영상 시청 길이에 따라 광고 시청 횟수 증가
 		incrementAdViews(video, startWatched, endWatched);
+
+
 
 		videoRepository.save(video);
 		watchedHistoryRepository.save(watcheHistory);

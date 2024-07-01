@@ -35,9 +35,13 @@ public class WatcheHistory extends Timestamped{
 		this.lastPlayTime = lastPlayTime;
 	}
 
-	// lastWatchedTime 업데이트하는 메서드
+	// lastWatchedPoisition 업데이트하는 메서드
 	public void updateWatchedPosition(int additionalTime) {
 		this.lastWatchedPosition += additionalTime;
+	}
+
+	public void resetWatchedPosition(int duration){
+		this.lastWatchedPosition = duration;
 	}
 
 	// lastPlayTime 초기화
