@@ -28,9 +28,9 @@ public class SecurityConfig {
 			.httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
 			.authorizeExchange(exchanges -> exchanges
 				.pathMatchers("/users/**").permitAll()
-				.pathMatchers("/streamings/**").permitAll()
+				.pathMatchers("/streamings/**").hasRole("USER")
 				.anyExchange().authenticated())
-			.addFilterAt(jwtAuthorizationFilter, SecurityWebFiltersOrder.AUTHORIZATION);
+			.addFilterAt(jwtAuthorizationFilter, SecurityWebFiltersOrder.AUTHENTICATION);
 
 		// 예외처리 발생 시 반환 세팅
 		http.exceptionHandling(exceptionHandling -> exceptionHandling

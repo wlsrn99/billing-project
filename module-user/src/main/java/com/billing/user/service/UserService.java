@@ -72,12 +72,13 @@ public class UserService {
 			throw new InvalidPasswordException(UserErrorCode.INVALID_PASSWORD_ERROR);
 		}
 
+		Long userId = userEntity.getId();
 		//리프레쉬 토큰 생성, DB에 저장
-		String refreshToken = jwtUtil.createRefreshToken(email, Collections.singletonList(userEntity.getUserType().getAuthority()));
+		String refreshToken = jwtUtil.createRefreshToken(email, Collections.singletonList(userEntity.getUserType().getAuthority()), userId);
 		userEntity.refreshTokenReset(refreshToken);
 		UserEntity saveUserEntity = userRepository.save(userEntity);
 
-		String accessToken = jwtUtil.createAccessToken(email, Collections.singletonList(userEntity.getUserType().getAuthority()));
+		String accessToken = jwtUtil.createAccessToken(email, Collections.singletonList(userEntity.getUserType().getAuthority()), userId);
 		LoginResponseDTO loginResponseDTO = new LoginResponseDTO(email,accessToken);
 
 

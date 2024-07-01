@@ -116,10 +116,18 @@ public class JwtUtil {
 		});
 	}
 
+	//토큰에서 이메일 추출
 	public String getEmailFromToken(String token) {
 		String originalToken = removeBearerPrefix(token);
 		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(originalToken).getBody();
 		return claims.getSubject();
+	}
+
+	//토큰에서 userId추출
+	public Long getUserIdFromToken(String token) {
+		String originalToken = removeBearerPrefix(token);
+		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(originalToken).getBody();
+		return claims.get("userId", Long.class);
 	}
 
 	public boolean validateToken(String accessToken) {

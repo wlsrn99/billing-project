@@ -1,9 +1,18 @@
 package com.billing.filter;
 
+import java.util.List;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -63,14 +72,28 @@ public class JwtAuthorizationFilter implements WebFilter {
 
 	private Mono<Void> mutateExchange(ServerWebExchange exchange, WebFilterChain chain, String accessToken) {
 		String email = jwtUtil.getEmailFromToken(accessToken); // JWT 토큰에서 Email추출
+		String userId = jwtUtil.getUserIdFromToken(accessToken).toString();
+		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
 		ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
 			.header(HttpHeaders.AUTHORIZATION, accessToken)
 			.header("email", email)
+			.header("userId", userId)
 			.build();
 
+		// 인증 객체 생성
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+		SecurityContext context = new SecurityContextImpl(authentication);
+
 		ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
-		return chain.filter(mutatedExchange);
+
+		return chain.filter(mutatedExchange)
+			.contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)))
+			.doOnEach(signal -> {
+				if (signal.isOnComplete() || signal.isOnError()) {
+					SecurityContextHolder.clearContext();
+				}
+			});
 	}
 
 	private Mono<String> requestNewAccessToken(ServerWebExchange exchange) {
