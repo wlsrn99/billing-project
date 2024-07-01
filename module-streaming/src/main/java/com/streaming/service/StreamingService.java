@@ -39,7 +39,6 @@ public class StreamingService {
 					.userId(userId)
 					.videoId(videoId)
 					.lastWatchedPosition(0)
-					.lastPlayTime(LocalDateTime.now())
 					.build();
 
 				return newHistory;
