@@ -73,6 +73,7 @@ public class JwtAuthorizationFilter implements WebFilter {
 	private Mono<Void> mutateExchange(ServerWebExchange exchange, WebFilterChain chain, String accessToken) {
 		String email = jwtUtil.getEmailFromToken(accessToken); // JWT 토큰에서 Email추출
 		String userId = jwtUtil.getUserIdFromToken(accessToken).toString();
+		//추후에 여기 부분 판매자랑 나누면 될 것 같다
 		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
 		ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()

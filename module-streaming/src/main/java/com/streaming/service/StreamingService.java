@@ -3,6 +3,7 @@ package com.streaming.service;
 import static com.streaming.exception.VideoException.*;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,10 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.streaming.dto.SaveResponseDTO;
+import com.streaming.entity.DailyAd;
+import com.streaming.entity.DailyVideo;
 import com.streaming.entity.Video;
 import com.streaming.entity.VideoAd;
 import com.streaming.entity.WatcheHistory;
 import com.streaming.exception.VideoErrorCode;
+import com.streaming.repository.DailyAdRepository;
+import com.streaming.repository.DailyVideoRepository;
 import com.streaming.repository.VideoRepository;
 import com.streaming.repository.WatchedHistoryRepository;
 
@@ -26,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 public class StreamingService {
 	private final VideoRepository videoRepository;
 	private final WatchedHistoryRepository watchedHistoryRepository;
+	private final DailyAdRepository dailyAdRepository;
+	private final DailyVideoRepository dailyVideoRepository;
 
 	@Transactional
 	public SaveResponseDTO playVideo(Long userId, Long videoId){
@@ -34,20 +41,19 @@ public class StreamingService {
 
 		// 조회수 증가
 		video.increaseViewCount(video.getViewCount() + 1);
-
 		videoRepository.save(video);
 
 		// 시청기록 확인
 		WatcheHistory watcheHistory = watchedHistoryRepository.findByUserIdAndVideoId(userId, videoId)
 			.orElseGet(() ->{
-				WatcheHistory newHistory = WatcheHistory.builder()
+				return WatcheHistory.builder()
 					.userId(userId)
 					.videoId(videoId)
 					.lastWatchedPosition(0)
 					.build();
-
-				return newHistory;
 			});
+
+		IncresedailyVideo(videoId, video);
 
 		watcheHistory.clearLastPlayTime(LocalDateTime.now());
 		watchedHistoryRepository.save(watcheHistory);
@@ -68,6 +74,7 @@ public class StreamingService {
 		int startWatched = watcheHistory.getLastWatchedPosition();
 		watcheHistory.updateWatchedPosition(secondsWatched);
 		watcheHistory.clearLastPlayTime(null);
+
 		//현재 시점에서 정지 버튼을 누른 지점
 		int endWatched = watcheHistory.getLastWatchedPosition();
 		Video video = videoRepository.findById(videoId).get();
@@ -88,6 +95,22 @@ public class StreamingService {
 		return watcheHistory;
 	}
 
+	private void IncresedailyVideo(Long videoId, Video video) {
+		// DailyVideo 테이블 처리
+		LocalDate currentDate = LocalDate.now();
+		DailyVideo dailyVideo = dailyVideoRepository.findByVideoIdAndDate(videoId, currentDate)
+			.orElseGet(() -> {
+				return DailyVideo.builder()
+					.date(currentDate)
+					.video(video)
+					.viewCount(0)
+					.build();
+			});
+
+		dailyVideo.increaseViewCount();
+		dailyVideoRepository.save(dailyVideo);
+	}
+
 	/**
 	 *
 	 * @param video 현재 동영상
@@ -96,10 +119,29 @@ public class StreamingService {
 	 */
 	private void incrementAdViews(Video video, int startWatched, int endWatched) {
 		List<VideoAd> videoAds = video.getVideoAds();
+		int count = 0;
 		for (VideoAd videoAd : videoAds) {
 			if(videoAd.isAdWatchedDuring(startWatched,endWatched)){
 				videoAd.incrementViewCount();
+				count++;
 			}
 		}
+		//데일리 광고 수 증가
+		updateDailyVideoAd(video, count);
+	}
+
+	private void updateDailyVideoAd(Video video, int count) {
+		LocalDate currentDate = LocalDate.now();
+		DailyAd dailyAd = dailyAdRepository.findByVideoAndDate(video, currentDate)
+			.orElseGet(() ->{
+					return DailyAd.builder()
+					.date(currentDate)
+					.video(video)
+					.viewCount(0)
+					.build();
+			});
+
+		dailyAd.increaseViewCount(count);
+		dailyAdRepository.save(dailyAd);
 	}
 }
