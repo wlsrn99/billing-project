@@ -25,8 +25,8 @@ public class BatchScheduler {
 	private final JobRegistry jobRegistry;
 
 
-	// @Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
-	@Scheduled(fixedRate = 20000) // 20초마다 실행
+	@Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
+	// @Scheduled(fixedRate = 20000) // 20초마다 실행
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");

@@ -11,13 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.streaming.dto.SaveResponseDTO;
-import com.streaming.entity.DailyAd;
 import com.streaming.entity.DailyVideo;
 import com.streaming.entity.Video;
 import com.streaming.entity.VideoAd;
 import com.streaming.entity.WatcheHistory;
 import com.streaming.exception.VideoErrorCode;
-import com.streaming.repository.DailyAdRepository;
 import com.streaming.repository.DailyVideoRepository;
 import com.streaming.repository.VideoRepository;
 import com.streaming.repository.WatchedHistoryRepository;
@@ -31,11 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 public class StreamingService {
 	private final VideoRepository videoRepository;
 	private final WatchedHistoryRepository watchedHistoryRepository;
-	private final DailyAdRepository dailyAdRepository;
 	private final DailyVideoRepository dailyVideoRepository;
 
 	@Transactional
-	public SaveResponseDTO playVideo(Long userId, Long videoId){
+	public SaveResponseDTO playVideo(Long userId, Long videoId) {
 		Video video = videoRepository.findById(videoId)
 			.orElseThrow(() -> new VideoNotFoundException(VideoErrorCode.VIDEO_NOT_FOUND));
 
@@ -45,7 +42,7 @@ public class StreamingService {
 
 		// 시청기록 확인
 		WatcheHistory watcheHistory = watchedHistoryRepository.findByUserIdAndVideoId(userId, videoId)
-			.orElseGet(() ->{
+			.orElseGet(() -> {
 				return WatcheHistory.builder()
 					.userId(userId)
 					.videoId(videoId)
@@ -60,13 +57,13 @@ public class StreamingService {
 	}
 
 	@Transactional
-	public WatcheHistory pauseVideo(Long userId, Long videoId){
+	public WatcheHistory pauseVideo(Long userId, Long videoId) {
 		WatcheHistory watcheHistory = watchedHistoryRepository.findByUserIdAndVideoId(userId, videoId)
 			.orElseThrow(() -> new VideoNotFoundException(VideoErrorCode.VIDEO_NOT_FOUND));
 
 		LocalDateTime now = LocalDateTime.now();
 		Duration duration = Duration.between(watcheHistory.getLastPlayTime(), now);
-		int secondsWatched = (int) duration.getSeconds();
+		int secondsWatched = (int)duration.getSeconds();
 
 		//현재 시점에서 재생 버튼을 누른 지점
 		int startWatched = watcheHistory.getLastWatchedPosition();
@@ -78,23 +75,19 @@ public class StreamingService {
 		Video video = videoRepository.findById(videoId).get();
 
 		//정지 버튼을 누른 지점이 영상의 길이보다 크다면 원래 영상 길이로 초기화
-		if(endWatched >= video.getDuration()){
+		if (endWatched >= video.getDuration()) {
 			watcheHistory.resetWatchedPosition(video.getDuration());
 			endWatched = watcheHistory.getLastWatchedPosition();
 		}
 
-		//영상 시청 길이에 따라 광고 시청 횟수 증가
-		incrementAdViews(video, startWatched, endWatched);
-
-		incrementdailyVideo(videoId, video, secondsWatched);
-
+		increasedailyVideo(videoId, video, secondsWatched, startWatched, endWatched);
 
 		videoRepository.save(video);
 		watchedHistoryRepository.save(watcheHistory);
 		return watcheHistory;
 	}
 
-	private void incrementdailyVideo(Long videoId, Video video, int secondsWatched) {
+	private void increasedailyVideo(Long videoId, Video video, int secondsWatched, int startWatched, int endWatched) {
 		// DailyVideo 테이블 처리
 		LocalDate currentDate = LocalDate.now();
 		DailyVideo dailyVideo = dailyVideoRepository.findByVideoIdAndDate(videoId, currentDate)
@@ -109,40 +102,22 @@ public class StreamingService {
 
 		dailyVideo.increaseViewCount();
 		dailyVideo.increaseDuration(secondsWatched);
+		//영상 시청 길이에 따라 광고 시청 횟수 증가
+		int adViewCount = getAdViewCount(video, startWatched, endWatched);
+		//데일리 광고 수 증가
+		dailyVideo.increaseAdViewCount(adViewCount);
 		dailyVideoRepository.save(dailyVideo);
 	}
 
-	/**
-	 *
-	 * @param video 현재 동영상
-	 * @param startWatched 재생 버튼을 누른 위치
-	 * @param endWatched 정지 버튼을 누른 위치
-	 */
-	private void incrementAdViews(Video video, int startWatched, int endWatched) {
+	private static int getAdViewCount(Video video, int startWatched, int endWatched) {
 		List<VideoAd> videoAds = video.getVideoAds();
 		int count = 0;
 		for (VideoAd videoAd : videoAds) {
-			if(videoAd.isAdWatchedDuring(startWatched,endWatched)){
+			if (videoAd.isAdWatchedDuring(startWatched, endWatched)) {
 				videoAd.incrementViewCount();
 				count++;
 			}
 		}
-		//데일리 광고 수 증가
-		updateDailyVideoAd(video, count);
-	}
-
-	private void updateDailyVideoAd(Video video, int count) {
-		LocalDate currentDate = LocalDate.now();
-		DailyAd dailyAd = dailyAdRepository.findByVideoAndDate(video, currentDate)
-			.orElseGet(() ->{
-					return DailyAd.builder()
-					.date(currentDate)
-					.video(video)
-					.viewCount(0)
-					.build();
-			});
-
-		dailyAd.increaseViewCount(count);
-		dailyAdRepository.save(dailyAd);
+		return count;
 	}
 }

@@ -49,4 +49,8 @@ public class DailyVideo {
 	public void increaseDuration(int secondsWatched) {
 		this.duration += secondsWatched;
 	}
+
+	public void increaseAdViewCount(int adViewCount) {
+		this.adViewCount += adViewCount;
+	}
 }
