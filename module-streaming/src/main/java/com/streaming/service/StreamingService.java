@@ -103,6 +103,7 @@ public class StreamingService {
 					.date(currentDate)
 					.video(video)
 					.viewCount(0)
+					.adViewCount(0)
 					.build();
 			});
 

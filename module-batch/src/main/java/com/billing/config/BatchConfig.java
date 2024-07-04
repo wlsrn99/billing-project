@@ -20,11 +20,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.billing.entity.DailyVideo;
 import com.billing.entity.VideoStatistic;
+import com.billing.processor.BillStatisticsProcessor;
 import com.billing.processor.DailyStatisticsProcessor;
 import com.billing.processor.MonthlyStatisticsProcessor;
 import com.billing.processor.WeeklyStatisticsProcessor;
 import com.billing.reader.DailyVideoReader;
 import com.billing.repository.DailyVideoRepository;
+import com.billing.repository.VideoRepository;
 import com.billing.writer.VideoStatisticWriter;
 
 import lombok.RequiredArgsConstructor;
@@ -45,16 +47,20 @@ public class BatchConfig {
 
 	@Bean
 	public CompositeItemProcessor<DailyVideo, VideoStatistic> compositeProcessor(
-		DailyVideoRepository dailyVideoRepository) {
+		DailyVideoRepository dailyVideoRepository,
+		VideoRepository videoRepository) {
 		List<ItemProcessor<?, VideoStatistic>> processors = List.of(
 			new DailyStatisticsProcessor(),
 			new WeeklyStatisticsProcessor(dailyVideoRepository),
-			new MonthlyStatisticsProcessor(dailyVideoRepository)
+			new MonthlyStatisticsProcessor(dailyVideoRepository),
+			new BillStatisticsProcessor(videoRepository)
 		);
+
 		CompositeItemProcessor<DailyVideo, VideoStatistic> compositeProcessor = new CompositeItemProcessor<>();
 		compositeProcessor.setDelegates(processors);
 		return compositeProcessor;
 	}
+
 
 
 	@Bean

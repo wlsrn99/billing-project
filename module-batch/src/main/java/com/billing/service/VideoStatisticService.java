@@ -59,7 +59,7 @@ public class VideoStatisticService {
 		return videoStatisticRepository.findTop5ByMonthlyDuration(startOfMonth, endOfMonth, pageable);
 	}
 
-
+	// 현재 시간을 검증하고 통계, 정산 데이터가 아직 없는 상태라면 이전일 기준으로 통계 낼때 쓰이는 메서드
 	// private LocalDate varifyCrrentTime(LocalDate date) {
 	// 	LocalDateTime now = LocalDateTime.now();
 	// 	if (now.getHour() < 6) {

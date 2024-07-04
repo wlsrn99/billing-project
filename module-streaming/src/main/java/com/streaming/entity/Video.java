@@ -50,4 +50,8 @@ public class Video extends Timestamped{
 	public void increaseViewCount(int viewCount){
 		this.viewCount = viewCount;
 	}
+
+	public void incrementViewCount(int dailyViewCount) {
+		this.viewCount += dailyViewCount;
+	}
 }

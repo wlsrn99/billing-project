@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 public class VideoTop5DurationDTO {
 	private String title;
-	private int duration;
+	private long duration;
 
 	@Builder
-	public VideoTop5DurationDTO(String title, int duration) {
+	public VideoTop5DurationDTO(String title, long duration) {
 		this.title = title;
 		this.duration = duration;
 	}

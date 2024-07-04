@@ -28,15 +28,17 @@ public class WeeklyStatisticsProcessor implements ItemProcessor<VideoStatistic, 
 
 		int weeklyViewCount = weeklyVideos.stream().mapToInt(DailyVideo::getViewCount).sum();
 		int weeklyDuration = weeklyVideos.stream().mapToInt(DailyVideo::getDuration).sum();
+		int weeklyAdViewCount = weeklyVideos.stream().mapToInt(DailyVideo::getAdViewCount).sum();
+
 		return VideoStatistic.builder()
 			.video(item.getVideo())
 			.date(item.getDate())
 			.dailyViewCount(item.getDailyViewCount())
 			.weeklyViewCount(weeklyViewCount)
-			.monthlyViewCount(0) // 월간 프로세서에서 설정
 			.dailyDuration(item.getDailyDuration())
 			.weeklyDuration(weeklyDuration)
-			.monthlyDuration(0)
+			.dailyAdViewCount(item.getDailyAdViewCount())
+			.weeklyAdViewCount(weeklyAdViewCount)
 			.build();
 	}
 }
