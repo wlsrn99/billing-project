@@ -18,6 +18,9 @@ public class DailyStatisticsProcessor implements ItemProcessor<DailyVideo, Video
 			.dailyViewCount(item.getViewCount())
 			.weeklyViewCount(0)  // 초기화, 주간 프로세서에서 설정
 			.monthlyViewCount(0) // 초기화, 월간 프로세서에서 설정
+			.dailyDuration(item.getDuration())
+			.weeklyDuration(0)
+			.monthlyDuration(0)
 			.build();
 	}
 }

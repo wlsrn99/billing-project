@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.streaming.dto.SaveResponseDTO;
-import com.streaming.dto.VideoRequest;
 import com.streaming.entity.WatcheHistory;
 import com.streaming.service.StreamingService;
 

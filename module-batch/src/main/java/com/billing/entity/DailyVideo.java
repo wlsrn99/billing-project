@@ -2,6 +2,7 @@ package com.billing.entity;
 
 import java.time.LocalDate;
 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,15 +31,13 @@ public class DailyVideo {
 
 	private LocalDate date;
 	private int viewCount;
+	private int duration;
 
 	@Builder
-	public DailyVideo(Video video, LocalDate date, int viewCount) {
+	public DailyVideo(Video video, LocalDate date, int viewCount, int duration) {
 		this.video = video;
 		this.date = date;
 		this.viewCount = viewCount;
-	}
-
-	public void increaseViewCount() {
-		this.viewCount++;
+		this.duration = duration;
 	}
 }

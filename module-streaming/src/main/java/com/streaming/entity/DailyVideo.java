@@ -30,15 +30,21 @@ public class DailyVideo {
 
 	private LocalDate date;
 	private int viewCount;
+	private int duration;
 
 	@Builder
-	public DailyVideo(Video video, LocalDate date, int viewCount) {
+	public DailyVideo(Video video, LocalDate date, int viewCount, int duration) {
 		this.video = video;
 		this.date = date;
 		this.viewCount = viewCount;
+		this.duration = duration;
 	}
 
 	public void increaseViewCount() {
 		this.viewCount++;
+	}
+
+	public void increaseDuration(int secondsWatched) {
+		this.duration += secondsWatched;
 	}
 }

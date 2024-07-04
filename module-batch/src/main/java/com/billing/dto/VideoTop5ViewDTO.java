@@ -1,18 +1,19 @@
 package com.billing.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
-public class DailyVideoDTO {
+public class VideoTop5ViewDTO {
 	private String title;
 	private int viewCount;
 
-	public DailyVideoDTO(String title, int viewCount) {
+	@Builder
+	public VideoTop5ViewDTO(String title, int viewCount) {
 		this.title = title;
 		this.viewCount = viewCount;
 	}
 }
+

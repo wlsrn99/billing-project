@@ -26,13 +26,17 @@ public class MonthlyStatisticsProcessor implements ItemProcessor<VideoStatistic,
 
 		List<DailyVideo> monthlyVideos = dailyVideoRepository.findAllByDateBetweenAndVideoId(startOfMonth, endOfMonth, item.getVideo().getId());
 		int monthlyViewCount = monthlyVideos.stream().mapToInt(DailyVideo::getViewCount).sum();
+		int monthlyDuration = monthlyVideos.stream().mapToInt(DailyVideo::getDuration).sum();
 
 		return VideoStatistic.builder()
-			.weeklyViewCount(item.getWeeklyViewCount())
-			.dailyViewCount(item.getDailyViewCount())
 			.date(item.getDate())
 			.video(item.getVideo())
+			.dailyViewCount(item.getDailyViewCount())
+			.weeklyViewCount(item.getWeeklyViewCount())
 			.monthlyViewCount(monthlyViewCount)
+			.dailyDuration(item.getDailyDuration())
+			.weeklyDuration(item.getWeeklyDuration())
+			.monthlyDuration(monthlyDuration)
 			.build();
 	}
 }

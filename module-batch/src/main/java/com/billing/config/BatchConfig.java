@@ -18,17 +18,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.billing.dto.DailyVideoDTO;
 import com.billing.entity.DailyVideo;
 import com.billing.entity.VideoStatistic;
 import com.billing.processor.DailyStatisticsProcessor;
 import com.billing.processor.MonthlyStatisticsProcessor;
-import com.billing.processor.Top5ViewItemProcessor;
 import com.billing.processor.WeeklyStatisticsProcessor;
 import com.billing.reader.DailyVideoReader;
-import com.billing.reader.Top5ViewItemReader;
 import com.billing.repository.DailyVideoRepository;
-import com.billing.writer.Top5ViewItemWriter;
 import com.billing.writer.VideoStatisticWriter;
 
 import lombok.RequiredArgsConstructor;
@@ -62,27 +58,6 @@ public class BatchConfig {
 
 
 	@Bean
-	public Job top5VideosJob(Step top5VideosStep) {
-		return new JobBuilder("top5VideosJob", jobRepository)
-			.incrementer(new RunIdIncrementer())
-			.start(top5VideosStep)
-			.build();
-	}
-
-
-	@Bean
-	public Step top5VideosStep(Top5ViewItemReader dailyVideoReader,
-		Top5ViewItemProcessor dailyVideoProcessor,
-		Top5ViewItemWriter dailyVideoWriter) {
-		return new StepBuilder("top5VideosStep", jobRepository)
-			.<DailyVideo, DailyVideoDTO>chunk(5, transactionManager)
-			.reader(dailyVideoReader)
-			.processor(dailyVideoProcessor)
-			.writer(dailyVideoWriter)
-			.build();
-	}
-
-	@Bean
 	public Job videoStatisticsJob(Step calculateStatisticsStep) {
 		return new JobBuilder("videoStatisticsJob", jobRepository)
 			.incrementer(new RunIdIncrementer())
@@ -102,11 +77,6 @@ public class BatchConfig {
 			.writer(videoStatisticWriter)
 			.build();
 	}
-
-
-
-
-
 
 
 

@@ -31,14 +31,21 @@ public class VideoStatistic {
 	private int dailyViewCount;
 	private int weeklyViewCount;
 	private int monthlyViewCount;
+	private int dailyDuration;
+	private int weeklyDuration;
+	private int monthlyDuration;
 
 	@Builder
-	public VideoStatistic(Video video, LocalDate date, int dailyViewCount, int weeklyViewCount, int monthlyViewCount) {
+	public VideoStatistic(Video video, LocalDate date, int dailyViewCount, int weeklyViewCount, int monthlyViewCount,
+		int dailyDuration, int weeklyDuration, int monthlyDuration) {
 		this.video = video;
 		this.date = date;
 		this.dailyViewCount = dailyViewCount;
 		this.weeklyViewCount = weeklyViewCount;
 		this.monthlyViewCount = monthlyViewCount;
+		this.dailyDuration = dailyDuration;
+		this.weeklyDuration = weeklyDuration;
+		this.monthlyDuration = monthlyDuration;
 	}
 }
 

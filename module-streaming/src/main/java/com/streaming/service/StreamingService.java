@@ -53,8 +53,6 @@ public class StreamingService {
 					.build();
 			});
 
-		IncresedailyVideo(videoId, video);
-
 		watcheHistory.clearLastPlayTime(LocalDateTime.now());
 		watchedHistoryRepository.save(watcheHistory);
 
@@ -88,6 +86,7 @@ public class StreamingService {
 		//영상 시청 길이에 따라 광고 시청 횟수 증가
 		incrementAdViews(video, startWatched, endWatched);
 
+		incrementdailyVideo(videoId, video, secondsWatched);
 
 
 		videoRepository.save(video);
@@ -95,7 +94,7 @@ public class StreamingService {
 		return watcheHistory;
 	}
 
-	private void IncresedailyVideo(Long videoId, Video video) {
+	private void incrementdailyVideo(Long videoId, Video video, int secondsWatched) {
 		// DailyVideo 테이블 처리
 		LocalDate currentDate = LocalDate.now();
 		DailyVideo dailyVideo = dailyVideoRepository.findByVideoIdAndDate(videoId, currentDate)
@@ -108,6 +107,7 @@ public class StreamingService {
 			});
 
 		dailyVideo.increaseViewCount();
+		dailyVideo.increaseDuration(secondsWatched);
 		dailyVideoRepository.save(dailyVideo);
 	}
 
