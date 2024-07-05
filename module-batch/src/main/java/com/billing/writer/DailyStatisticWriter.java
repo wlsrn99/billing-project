@@ -27,7 +27,7 @@ public class DailyStatisticWriter implements ItemWriter<VideoStatistic> {
 					.dailyAdViewCount(item.getDailyAdViewCount())
 					.date(item.getDate())
 					.build()
-			); // 데이터 전역 캐시에 추가
+			); // 글로벌 캐시에 데이터 추가
 		}
 	}
 }

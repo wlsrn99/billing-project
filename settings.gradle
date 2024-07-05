@@ -6,4 +6,5 @@ include 'module-gateway'
 include 'module-discovery'
 include 'module-common'
 include 'module-batch'
+include 'module-seller'
 
