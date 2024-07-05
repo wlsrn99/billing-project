@@ -1,9 +1,8 @@
 package com.streaming.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -22,7 +21,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "videos")
-public class Video extends Timestamped{
+// extends Timestamped
+public class Video {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "video_id")
@@ -34,24 +34,32 @@ public class Video extends Timestamped{
 
 	private int duration;
 
-	private int viewCount;
+	private Long viewCount;
+
+	private Long adCount;
+
+	private LocalDateTime createdAt;
 
 	@OneToMany(mappedBy = "video", cascade = CascadeType.PERSIST, orphanRemoval = true)
 	private List<VideoAd> videoAds = new ArrayList<>();
 
 	@Builder
-	public Video(Long userId, String title, int duration, int viewCount) {
+	public Video(Long userId, String title, int duration, long viewCount, long adCount, List<VideoAd> videoAds
+	, LocalDateTime createdAt) {
 		this.userId = userId;
 		this.title = title;
 		this.duration = duration;
 		this.viewCount = viewCount;
+		this.adCount = adCount;
+		this.videoAds = videoAds;
+		this.createdAt = createdAt;
 	}
 
-	public void increaseViewCount(int viewCount){
+	public void increaseViewCount(long viewCount){
 		this.viewCount = viewCount;
 	}
 
-	public void incrementViewCount(int dailyViewCount) {
-		this.viewCount += dailyViewCount;
+	public void increaseAdCount(long adCount){
+		this.adCount = adCount;
 	}
 }

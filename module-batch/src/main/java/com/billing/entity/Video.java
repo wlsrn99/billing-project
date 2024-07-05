@@ -1,7 +1,9 @@
 package com.billing.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -20,7 +22,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "videos")
-public class Video extends Timestamped{
+// extends Timestamped
+public class Video {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "video_id")
@@ -32,22 +35,21 @@ public class Video extends Timestamped{
 
 	private int duration;
 
-	private int viewCount;
+	private Long viewCount;
 
-	@OneToMany(mappedBy = "video", cascade = CascadeType.PERSIST, orphanRemoval = true)
-	private List<VideoAd> videoAds = new ArrayList<>();
+	private Long adCount;
+
+	private LocalDateTime createdAt;
 
 	@Builder
-	public Video(Long userId, String title, int duration, int viewCount) {
+	public Video(Long userId, String title, int duration, long viewCount, long adCount
+		, LocalDateTime createdAt) {
 		this.userId = userId;
 		this.title = title;
 		this.duration = duration;
 		this.viewCount = viewCount;
+		this.adCount = adCount;
+		this.createdAt = createdAt;
 	}
-
-	public void increaseViewCount(int viewCount){
-		this.viewCount = viewCount;
-	}
-
 
 }

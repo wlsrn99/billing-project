@@ -8,6 +8,9 @@ import com.billing.entity.Video;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
 	@Query("SELECT v.viewCount FROM Video v WHERE v.id = :id")
-	int findViewCountById(@Param("id") Long id);
+	long findViewCountById(@Param("id") Long id);
+
+	@Query("SELECT v.adCount FROM Video v WHERE v.id = :id")
+	long findAdCountById(@Param("id") Long videoId);
 }
 
