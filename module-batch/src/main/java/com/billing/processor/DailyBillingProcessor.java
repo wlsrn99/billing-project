@@ -1,10 +1,9 @@
 package com.billing.processor;
 
-import java.time.LocalDate;
-
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
+import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
 import com.billing.repository.VideoRepository;
 
@@ -12,21 +11,18 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class DailyBillingProcessor implements ItemProcessor<VideoStatistic, VideoStatistic>{
+public class DailyBillingProcessor implements ItemProcessor<VideoStatistic, VideoBill>{
 	private final VideoRepository videoRepository;
 	@Override
-	public VideoStatistic process(VideoStatistic item) throws Exception {
+	public VideoBill process(VideoStatistic item) throws Exception {
 		long totalView = videoRepository.findViewCountById(item.getVideoId());
 		long totalAdView = videoRepository.findAdCountById(item.getVideoId());
 
 		long dailyViewBill = calculateViewCost(totalView, item.getDailyViewCount());
 		long dailyAdBill = calculateViewCost(totalAdView, item.getDailyAdViewCount());
 
-		return VideoStatistic.builder()
+		return VideoBill.builder()
 			.videoId(item.getVideoId())
-			.dailyViewCount(item.getDailyViewCount())
-			.dailyAdViewCount(item.getDailyAdViewCount())
-			.dailyDuration(item.getDailyDuration())
 			.date(item.getDate())
 			.dailyViewBill(dailyViewBill)
 			.dailyAdBill(dailyAdBill)

@@ -1,5 +1,7 @@
 package com.billing.scheduler;
 
+import java.time.LocalDate;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -52,6 +54,8 @@ public class BatchScheduler {
 			log.info("Running video statistics job");
 			JobParameters jobParameters = new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
+				.addLocalDate("date", LocalDate.of(2024, 6, 7))
+				.addLong("chunkSize", 10L)
 				.toJobParameters();
 
 			Job job = jobRegistry.getJob("videoStatisticsJob");
