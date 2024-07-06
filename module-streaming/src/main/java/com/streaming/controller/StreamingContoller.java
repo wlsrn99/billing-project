@@ -1,8 +1,6 @@
 package com.streaming.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.streaming.dto.CreateRequestDTO;
 import com.streaming.dto.CreateResponseDTO;
 import com.streaming.dto.PauseResponseDTO;
-import com.streaming.dto.SaveResponseDTO;
+import com.streaming.dto.StartResponseDTO;
 import com.streaming.service.StreamingService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,8 +30,8 @@ public class StreamingContoller {
 
 
 	@PostMapping("/{videoId}/play")
-	public ResponseEntity<SaveResponseDTO> playVideo(@RequestHeader("userId") Long userId, @PathVariable Long videoId) {
-		SaveResponseDTO responseDTO = streamingService.playVideo(userId, videoId);
+	public ResponseEntity<StartResponseDTO> playVideo(@RequestHeader("userId") Long userId, @PathVariable Long videoId) {
+		StartResponseDTO responseDTO = streamingService.playVideo(userId, videoId);
 		return ResponseEntity.ok(responseDTO);
 	}
 

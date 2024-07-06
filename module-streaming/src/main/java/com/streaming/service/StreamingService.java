@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.streaming.dto.CreateRequestDTO;
 import com.streaming.dto.CreateResponseDTO;
 import com.streaming.dto.PauseResponseDTO;
-import com.streaming.dto.SaveResponseDTO;
+import com.streaming.dto.StartResponseDTO;
 import com.streaming.entity.AdDetail;
 import com.streaming.entity.Video;
 import com.streaming.entity.VideoAd;
@@ -39,7 +39,7 @@ public class StreamingService {
 	private final AdDetailRepository adDetailRepository;
 
 	@Transactional
-	public SaveResponseDTO playVideo(Long userId, Long videoId) {
+	public StartResponseDTO playVideo(Long userId, Long videoId) {
 		Video video = videoRepository.findById(videoId)
 			.orElseThrow(() -> new VideoNotFoundException(VideoErrorCode.VIDEO_NOT_FOUND));
 
@@ -58,7 +58,7 @@ public class StreamingService {
 
 		watchedHistoryRepository.save(watchHistory);
 
-		return new SaveResponseDTO(video, watchHistory.getLastWatchedPosition());
+		return new StartResponseDTO(video, watchHistory.getLastWatchedPosition());
 	}
 
 	@Transactional
