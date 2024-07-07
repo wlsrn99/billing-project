@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.streaming.dto.PeriodType;
+import com.streaming.dto.bill.PeriodType;
 import com.streaming.dto.bill.TopDurationVideoDTO;
 import com.streaming.dto.bill.TopViewedVideoDTO;
 import com.streaming.repository.Top5Repository;

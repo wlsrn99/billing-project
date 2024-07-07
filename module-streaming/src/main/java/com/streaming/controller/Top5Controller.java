@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.streaming.dto.PeriodType;
+import com.streaming.dto.bill.PeriodType;
 import com.streaming.dto.bill.BillResponseMessage;
 import com.streaming.dto.bill.TopDurationVideoDTO;
 import com.streaming.dto.bill.TopViewedVideoDTO;
@@ -90,7 +90,7 @@ public class Top5Controller {
 		@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
 		@RequestHeader("userId") long userId
 	){
-		List<TopDurationVideoDTO> response = top5Service.readTop5DurationBill(date, userId, PeriodType.WEEKLY);
+		List<TopDurationVideoDTO> response = top5Service.readTop5DurationBill(date, userId, PeriodType.MONTHLY);
 		return ResponseEntity.ok(BillResponseMessage.<List<TopDurationVideoDTO>>builder()
 			.message(userId + "님의 월간 영상 재생 시간 Top5 입니다")
 			.data(response)
