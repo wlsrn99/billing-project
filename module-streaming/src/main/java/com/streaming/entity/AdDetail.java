@@ -23,10 +23,11 @@ public class AdDetail {
 
 	private String title;
 
+	private int priority;
 
 	@Builder
-	public AdDetail(String title) {
+	public AdDetail(String title, int priority) {
 		this.title = title;
+		this.priority = priority;
 	}
-
 }

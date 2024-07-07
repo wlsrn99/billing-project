@@ -4,8 +4,6 @@ package com.billing.user.service;
 import static com.billing.exception.UserException.*;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,7 +44,7 @@ public class UserService {
 		//이메일 유효성 검사
 		validateUserEmail(requestDTO.getEmail());
 
-		UserType userType = requestDTO.getUsertype().equals("시청자") ? UserType.USER: UserType.SELEER;
+		UserType userType = requestDTO.getUsertype().equals("시청자") ? UserType.USER: UserType.SELLER;
 
 
 		//비밀번호 암호화

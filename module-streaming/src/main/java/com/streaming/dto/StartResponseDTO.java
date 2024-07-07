@@ -10,15 +10,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SaveResponseDTO {
+public class StartResponseDTO {
 	private int lastWatchedPosition;
 	private Long id;
 	private String title;
 	private int duration;
 	private List<VideoAdDTO> videoAds;
 
-	//json양방향 순환 참조 문제 해결
-	public SaveResponseDTO(Video video, int lastWatchedPosition) {
+	//json양방향 json 순환 참조 문제 해결
+	public StartResponseDTO(Video video, int lastWatchedPosition) {
 		this.lastWatchedPosition = lastWatchedPosition;
 		this.id = video.getId();
 		this.title = video.getTitle();

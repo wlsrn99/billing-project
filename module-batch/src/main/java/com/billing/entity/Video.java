@@ -1,8 +1,9 @@
-package com.streaming.entity;
+package com.billing.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -40,26 +41,15 @@ public class Video {
 
 	private LocalDateTime createdAt;
 
-	@OneToMany(mappedBy = "video", cascade = CascadeType.PERSIST, orphanRemoval = true)
-	private List<VideoAd> videoAds = new ArrayList<>();
-
 	@Builder
-	public Video(Long userId, String title, int duration, long viewCount, long adCount, List<VideoAd> videoAds
-	, LocalDateTime createdAt) {
+	public Video(Long userId, String title, int duration, long viewCount, long adCount
+		, LocalDateTime createdAt) {
 		this.userId = userId;
 		this.title = title;
 		this.duration = duration;
 		this.viewCount = viewCount;
 		this.adCount = adCount;
-		this.videoAds = videoAds;
 		this.createdAt = createdAt;
 	}
 
-	public void increaseViewCount(long viewCount){
-		this.viewCount = viewCount;
-	}
-
-	public void increaseAdCount(long adCount){
-		this.adCount = adCount;
-	}
 }

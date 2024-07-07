@@ -1,6 +1,7 @@
 package com.billing.filter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -73,7 +74,14 @@ public class JwtAuthorizationFilter implements WebFilter {
 	private Mono<Void> mutateExchange(ServerWebExchange exchange, WebFilterChain chain, String accessToken) {
 		String email = jwtUtil.getEmailFromToken(accessToken); // JWT 토큰에서 Email추출
 		String userId = jwtUtil.getUserIdFromToken(accessToken).toString();
-		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+		// JWT 토큰에서 roles 리스트 추출
+		List<String> rolesList = jwtUtil.getRolesFromToken(accessToken);
+		log.info("rolesList: {}", rolesList);
+
+		// roles 리스트를 GrantedAuthority 리스트로 변환
+		List<GrantedAuthority> authorities = rolesList.stream()
+			.map(SimpleGrantedAuthority::new)
+			.collect(Collectors.toList());
 
 		ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
 			.header(HttpHeaders.AUTHORIZATION, accessToken)

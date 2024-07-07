@@ -28,7 +28,9 @@ public class SecurityConfig {
 			.httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
 			.authorizeExchange(exchanges -> exchanges
 				.pathMatchers("/users/**").permitAll()
-				.pathMatchers("/streamings/**").hasRole("USER")
+				.pathMatchers("/streamings/streaming/**").permitAll()
+				.pathMatchers("/streamings/batch/**").hasRole("SELLER")
+				.pathMatchers("/streamings/top5/**").hasRole("SELLER")
 				.anyExchange().authenticated())
 			.addFilterAt(jwtAuthorizationFilter, SecurityWebFiltersOrder.AUTHENTICATION);
 
