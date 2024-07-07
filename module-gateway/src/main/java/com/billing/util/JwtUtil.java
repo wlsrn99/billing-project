@@ -126,12 +126,27 @@ public class JwtUtil {
 	//토큰에서 userId추출
 	public Long getUserIdFromToken(String token) {
 		String originalToken = removeBearerPrefix(token);
-		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(originalToken).getBody();
+		Claims claims = Jwts.parserBuilder()
+			.setSigningKey(key)
+			.build().
+			parseClaimsJws(originalToken)
+			.getBody();
 		return claims.get("userId", Long.class);
 	}
 
 	public boolean validateToken(String accessToken) {
 		return validateTokenInternal(accessToken);
+	}
+
+	public List<String> getRolesFromToken(String token) {
+		String originalToken = removeBearerPrefix(token);
+		Claims claims = Jwts.parserBuilder()
+			.setSigningKey(key)
+			.build()
+			.parseClaimsJws(originalToken)
+			.getBody();
+
+		return claims.get("roles", List.class);
 	}
 
 	// 토큰 검증 공통 로직
