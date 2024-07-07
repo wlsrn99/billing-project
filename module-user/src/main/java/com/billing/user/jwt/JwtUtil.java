@@ -3,6 +3,7 @@ package com.billing.user.jwt;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,12 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtUtil {
 	// Header KEY 값
 	public static final String AUTHORIZATION_HEADER = "Authorization";
-	// 리프레시 헤더 값
-	public static final String REFRESH_HEADER = "RefreshToken";
 	// Token 식별자
 	public static final String BEAR = "Bearer ";
 	// 토큰 만료시간 (30분)
-
 	private static final long TOKEN_TIME = 30 * 60 * 1000L;
 	// 리프레시 토큰 만료시간 (7일)
 	private static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L;
@@ -52,7 +50,7 @@ public class JwtUtil {
 	}
 
 	// 토큰 생성 공통 로직
-	private String createToken(String subject, long expirationTime) {
+	private String createToken(String subject, long expirationTime, List<String> roles, Long userId) {
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + expirationTime);
 
@@ -60,19 +58,21 @@ public class JwtUtil {
 			.setSubject(subject)
 			.setIssuedAt(now)
 			.setExpiration(expiryDate)
-			.signWith(key, signatureAlgorithm);
+			.signWith(key, signatureAlgorithm)
+			.claim("roles", roles)
+			.claim("userId", userId);
 
 		return BEAR + builder.compact();
 	}
 
 	// 액세스 토큰 생성
-	public String createAccessToken(String email) {
-		return createToken(email, TOKEN_TIME);
+	public String createAccessToken(String email, List<String> roles, Long userId) {
+		return createToken(email, TOKEN_TIME, roles, userId);
 	}
 
 	// 리프레시 토큰 생성
-	public String createRefreshToken(String email) {
-		String bearerToken =  createToken(email, REFRESH_TOKEN_TIME);
+	public String createRefreshToken(String email, List<String> roles, Long userId) {
+		String bearerToken = createToken(email, REFRESH_TOKEN_TIME, roles, userId);
 		return bearerToken.substring(7).trim();
 	}
 
@@ -84,7 +84,6 @@ public class JwtUtil {
 		}
 		return null;
 	}
-
 
 	// 토큰 검증
 	public boolean validateToken(String token) {
@@ -120,7 +119,7 @@ public class JwtUtil {
 		} catch (IllegalArgumentException e) {
 			log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.", e);
 			throw e;
-		} catch (Exception e){
+		} catch (Exception e) {
 			log.error("잘못되었습니다.", e);
 			throw e;
 		}
@@ -136,6 +135,18 @@ public class JwtUtil {
 		return getEmailFromClaims(token);
 	}
 
+	// 리프레시 토큰에서 role 가져오기
+	public List<String> getRolesFromRefreshToken(String token) {
+		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+		return claims.get("roles", List.class);
+	}
+
+	// 토큰에서 userId 가져오기
+	public Long getUserIdFromToken(String token){
+		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+		return claims.get("userId", Long.class);
+	}
+
 	// 공통 로직 분리
 	private String getEmailFromClaims(String token) {
 		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
@@ -146,8 +157,12 @@ public class JwtUtil {
 	public String refreshAccessToken(String refreshToken) {
 		if (validateRefreshToken(refreshToken)) {
 			String email = getEmailFromRefreshToken(refreshToken);
-			// 여기에서 필요한 경우 사용자 역할 정보를 가져올 수 있다.
-			return createAccessToken(email); // 사용자 역할이 필요하면 두 번째 인자에 역할을 전달
+
+			List<String> roles = getRolesFromRefreshToken(refreshToken);
+
+			Long userId = getUserIdFromToken(refreshToken);
+
+			return createAccessToken(email, roles,userId);
 		}
 		return null;
 	}
@@ -161,6 +176,5 @@ public class JwtUtil {
 	private boolean isTokenBlacklisted(String token) {
 		return tokenBlacklist.contains(token);
 	}
-
 
 }

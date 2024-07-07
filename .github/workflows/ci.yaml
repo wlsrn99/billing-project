@@ -40,9 +40,7 @@ jobs:
 
       - name: Create module-user application.yml  # module-user의 application.yml 파일을 생성
         run: |
-          mkdir -p module-user/src/main/resources
           mkdir -p module-user/src/test/resources
-          echo "${{ secrets.MODULE_USER_APPLICATION_YML }}" | base64 --decode > module-user/src/main/resources/application.yml
           echo "${{ secrets.MODULE_USER_TEST_YML }}" | base64 --decode > module-user/src/test/resources/application.yml
 
       - name: Build and test module-user  # module-user를 빌드하고 테스트
@@ -56,9 +54,7 @@ jobs:
 
       - name: Create module-streaming application.yml  # module-streaming의 application.yml 파일을 생성
         run: |
-          mkdir -p module-streaming/src/main/resources
           mkdir -p module-streaming/src/test/resources
-          echo "${{ secrets.MODULE_STREAMING_APPLICATION_YML }}" | base64 --decode > module-streaming/src/main/resources/application.yml
           echo "${{ secrets.MODULE_STREAMING_TEST_YML }}" | base64 --decode > module-streaming/src/test/resources/application.yml
 
       - name: Build and test module-streaming  # module-streaming을 빌드하고 테스트
