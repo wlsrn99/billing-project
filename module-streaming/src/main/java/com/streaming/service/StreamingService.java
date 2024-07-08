@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.streaming.aop.annotations.WriteOnly;
 import com.streaming.dto.CreateRequestDTO;
 import com.streaming.dto.CreateResponseDTO;
 import com.streaming.dto.PauseResponseDTO;
@@ -38,6 +39,7 @@ public class StreamingService {
 	private final VideoAdRepository videoAdRepository;
 	private final AdDetailRepository adDetailRepository;
 
+	@WriteOnly
 	@Transactional
 	public StartResponseDTO playVideo(Long userId, Long videoId) {
 		Video video = videoRepository.findById(videoId)
@@ -56,11 +58,14 @@ public class StreamingService {
 					.build();
 			});
 
+		LocalDateTime nowTime = LocalDateTime.now();
+		watchHistory.updateWatchedAt(nowTime);
 		watchedHistoryRepository.save(watchHistory);
 
 		return new StartResponseDTO(video, watchHistory.getLastWatchedPosition());
 	}
 
+	@WriteOnly
 	@Transactional
 	public PauseResponseDTO pauseVideo(Long userId, Long videoId) {
 		WatchHistory watchHistory = watchedHistoryRepository.findByRecentHistory(userId, videoId)
@@ -106,6 +111,7 @@ public class StreamingService {
 			.build();
 	}
 
+	@WriteOnly
 	@Transactional
 	public CreateResponseDTO createVideo(Long userId, CreateRequestDTO createRequestDTO) {
 		// 새 비디오 생성
