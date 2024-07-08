@@ -18,11 +18,16 @@ jobs:
       - name: Checkout code  # 코드를 체크아웃
         uses: actions/checkout@v3
 
-      - name: Build and run Docker Compose  # Docker Compose를 사용해 MySQL 컨테이너를 빌드 및 실행
+      - name: Build Docker images
+        run: |
+          docker build -t mysql-reader -f dockerfile-reader .
+          docker build -t mysql-writer -f dockerfile-writer .
+
+      - name: Build and run Docker Compose
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker-compose -f docker-compose-mysql.yml up -d   
+          docker-compose -f docker-compose-mysql.yml up -d  
 
       - name: Set up JDK 21  # JDK 21을 설치
         uses: actions/setup-java@v3
