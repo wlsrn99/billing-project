@@ -45,9 +45,9 @@ public class StreamingService {
 		Video video = videoRepository.findById(videoId)
 			.orElseThrow(() -> new VideoNotFoundException(VideoErrorCode.VIDEO_NOT_FOUND));
 
+		// 원자적 연산
 		// 조회수 증가
-		video.increaseViewCount(video.getViewCount() + 1);
-		videoRepository.save(video);
+		videoRepository.incrementViewCount(videoId);
 
 		LocalDate now = LocalDate.now();
 		WatchHistory watchHistory = watchedHistoryRepository.findByUserIdAndVideoIdAndCreatedAt(userId, videoId, now)
@@ -92,12 +92,15 @@ public class StreamingService {
 		//오늘 날짜의 재생한 시간 업데이트
 		watchHistory.updateDuration(endWatched - startWatched);
 
-		//영상 시청 길이에 따라 광고 시청 횟수 증가
+		//영상 시청 길이에 따라 광고 시청 횟수 구하기
 		int adViewCount = getAdViewCount(video, startWatched, endWatched);
 
 		//오늘 날짜의 광고 본 횟수 업데이트
 		watchHistory.updateAdViewCount(adViewCount);
-		video.increaseAdCount(video.getAdCount() + adViewCount);
+
+		// 원자적 연산
+		// 비디오 테이블 광고 조회수 증가
+		videoRepository.incrementAdCount(videoId, adViewCount);
 
 
 		watchedHistoryRepository.save(watchHistory);
