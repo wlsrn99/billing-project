@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Async;
 
+import com.billing.dto.VideoBillingDTO;
 import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
 import com.billing.repository.VideoRepository;
@@ -33,10 +34,10 @@ public class DailyBillingProcessor implements ItemProcessor<VideoStatistic, Vide
 		long totalCount = videoRepository.count(); //데이터베이스에 있는 video의 전체 숫자
 		for (int page = 0; page < (totalCount + pageSize - 1) / pageSize; page++) {
 			Pageable pageable = PageRequest.of(page, pageSize);
-			List<Object[]> counts = videoRepository.findAllViewAndAdCountsPaged(pageable);
-			for (Object[] count : counts) {
-				viewCountCache.put((Long)count[0], (Long)count[1]);
-				adCountCache.put((Long)count[0], (Long)count[2]);
+			List<VideoBillingDTO> counts = videoRepository.findAllViewAndAdCountsPaged(pageable);
+			for (VideoBillingDTO count : counts) {
+				viewCountCache.put(count.getVideoId(), count.getViewCount());
+				adCountCache.put(count.getVideoId(), count.getAdCount());
 			}
 			log.info("Loaded {} records into cache", (page + 1) * pageSize);
 		}
