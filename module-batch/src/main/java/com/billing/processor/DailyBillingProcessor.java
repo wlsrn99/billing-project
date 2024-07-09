@@ -1,45 +1,88 @@
 package com.billing.processor;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Async;
 
 import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
 import com.billing.repository.VideoRepository;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
-public class DailyBillingProcessor implements ItemProcessor<VideoStatistic, VideoBill>{
+@Slf4j
+public class DailyBillingProcessor implements ItemProcessor<VideoStatistic, VideoBill> {
 	private final VideoRepository videoRepository;
+	private final Map<Long, Long> viewCountCache = new ConcurrentHashMap<>();
+	private final Map<Long, Long> adCountCache = new ConcurrentHashMap<>();
+
+	@Async //별도의 스레드에서 비동기적으로 실행되어야 초기화되는 중간에도 process스레드를 실행시킬 수 있음
+	@PostConstruct
+	public void init() {
+		int pageSize = 10000; //10000개씩 로드
+		long totalCount = videoRepository.count(); //데이터베이스에 있는 video의 전체 숫자
+		for (int page = 0; page < (totalCount + pageSize - 1) / pageSize; page++) {
+			Pageable pageable = PageRequest.of(page, pageSize);
+			List<Object[]> counts = videoRepository.findAllViewAndAdCountsPaged(pageable);
+			for (Object[] count : counts) {
+				viewCountCache.put((Long)count[0], (Long)count[1]);
+				adCountCache.put((Long)count[0], (Long)count[2]);
+			}
+			log.info("Loaded {} records into cache", (page + 1) * pageSize);
+		}
+		log.info("Cache initialization completed");
+	}
+
 	@Override
 	public VideoBill process(VideoStatistic item) throws Exception {
-		long totalView = videoRepository.findViewCountById(item.getVideoId());
-		long totalAdView = videoRepository.findAdCountById(item.getVideoId());
+		try {
+			long totalView = getViewCount(item.getVideoId());
+			long totalAdView = getAdCount(item.getVideoId());
 
-		long dailyViewBill = calculateViewCost(totalView, item.getDailyViewCount());
-		long dailyAdBill = calculateViewCost(totalAdView, item.getDailyAdViewCount());
+			long dailyViewBill = calculateViewCost(totalView, item.getDailyViewCount());
+			long dailyAdBill = calculateAdCost(totalAdView, item.getDailyAdViewCount());
 
-		return VideoBill.builder()
-			.videoId(item.getVideoId())
-			.date(item.getDate())
-			.dailyViewBill(dailyViewBill)
-			.dailyAdBill(dailyAdBill)
-			.totalBill(dailyViewBill + dailyAdBill)
-			.build();
+			return VideoBill.builder()
+				.videoId(item.getVideoId())
+				.date(item.getDate())
+				.dailyViewBill(dailyViewBill)
+				.dailyAdBill(dailyAdBill)
+				.totalBill(dailyViewBill + dailyAdBill)
+				.build();
+		} catch (Exception e) {
+			log.error("Error processing item: " + item, e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	//캐시 누락 대비 메소드
+	private long getViewCount(Long videoId) {
+		return viewCountCache.computeIfAbsent(videoId, videoRepository::findViewCountById);
+	}
+
+	//캐시 누락 대비 메소드
+	private long getAdCount(Long videoId) {
+		return adCountCache.computeIfAbsent(videoId, videoRepository::findAdCountById);
 	}
 
 	private long calculateViewCost(long totalViews, long views) {
 		long currentTotalViews = totalViews - views;
-
 		double[] rates = {1.0, 1.1, 1.3, 1.5};
 		return calculateCost(currentTotalViews, views, rates);
 	}
 
-	public long calculateAdCost(long totalViews, long views) {
+	private long calculateAdCost(long totalViews, long views) {
 		long currentTotalViews = totalViews - views;
-
 		double[] rates = {10.0, 12.0, 15.0, 20.0};
 		return calculateCost(currentTotalViews, views, rates);
 	}
@@ -67,6 +110,4 @@ public class DailyBillingProcessor implements ItemProcessor<VideoStatistic, Vide
 
 		return (long)cost;
 	}
-
-
 }

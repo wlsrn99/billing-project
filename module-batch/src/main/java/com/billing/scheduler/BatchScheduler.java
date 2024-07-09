@@ -1,6 +1,7 @@
 package com.billing.scheduler;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -47,15 +48,16 @@ public class BatchScheduler {
 	// 	}
 	// }
 
-	@Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
-	// @Scheduled(fixedRate = 20000) // 20초마다 실행
+	// @Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
+	@Scheduled(fixedRate = 200000) // 200초마다 실행
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");
 			JobParameters jobParameters = new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
-				.addLocalDate("date", LocalDate.of(2024, 6, 7))
+				.addLocalDate("date", LocalDate.of(2024, 6, 6))
 				.addLong("chunkSize", 10L)
+				.addString("uniqueId", UUID.randomUUID().toString())
 				.toJobParameters();
 
 			Job job = jobRegistry.getJob("videoStatisticsJob");
