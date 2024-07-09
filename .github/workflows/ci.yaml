@@ -20,8 +20,8 @@ jobs:
 
       - name: Build Docker images
         run: |
-          docker build -t mysql-reader -f dockerfile-reader .
-          docker build -t mysql-writer -f dockerfile-writer .
+          docker build -t mysql-reader -f Dockerfile-reader .
+          docker build -t mysql-writer -f Dockerfile-writer .
 
       - name: Build and run Docker Compose
         env:
