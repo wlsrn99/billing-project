@@ -2,6 +2,10 @@ plugins {
     id 'java'
 }
 
+java {
+    sourceCompatibility = '21'
+}
+
 group = 'com.billing'
 version = '0.0.1-SNAPSHOT'
 
