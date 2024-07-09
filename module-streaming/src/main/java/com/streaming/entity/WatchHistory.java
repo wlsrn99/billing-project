@@ -32,11 +32,11 @@ public class WatchHistory {
 	private int lastWatchedPosition;
 
 	// 만든 날짜 -> 배치 통계테이블 만들 때 쓰일 예정
-	// @CreatedDate
+	@CreatedDate
 	private LocalDate createdAt;
 
 	// 재생 버튼을 누른 시간 -> duration 계산용
-	// @CreatedDate
+	@CreatedDate
 	private LocalDateTime watchedAt;
 
 	// 동영상 재생 시간
@@ -75,4 +75,7 @@ public class WatchHistory {
 		this.lastWatchedPosition = duration;
 	}
 
+	public void updateWatchedAt(LocalDateTime watchedAt) {
+		this.watchedAt = watchedAt;
+	}
 }

@@ -1,14 +1,9 @@
 package com.billing.user.Controller;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -89,7 +84,7 @@ public class UserController {
 	 * 	   - 메시지: 로그아웃 상태를 설명하는 메시지
 	 * 	   - 데이터: 로그아웃된 회원의 이메일
 	 */
-	@GetMapping("/logout")
+	@PostMapping("/logout")
 	public ResponseEntity<ResponseMessage<String>> logout(HttpServletRequest request){
 
 		String accessToken = jwtUtil.getJwtFromHeader(request);
