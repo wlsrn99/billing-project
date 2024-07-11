@@ -3,9 +3,6 @@ package com.billing.config;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -30,13 +27,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
 import com.billing.listener.StatisticJobListener;
+import com.billing.listener.ThreadPoolMonitoringListener;
 import com.billing.validator.UniqueJobParametersValidator;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableBatchProcessing
+@Slf4j
 public class BatchConfig {
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
@@ -60,16 +60,20 @@ public class BatchConfig {
 	 *
 	 * @param dailyStatisticsStep 통계 데이터를 만드는 step
 	 * @param dailyBillingStep 정산데이터를 만드는 step
-	 * @param statisticJobListener job과 step에 대한 상태 체크, Job 실패 시 재시작 로직
+	 *
 	 * @return
 	 */
 	@Bean
-	public Job videoStatisticsJob(Step dailyStatisticsStep, Step dailyBillingStep, StatisticJobListener statisticJobListener) {
+	public Job videoStatisticsJob(
+		Step dailyStatisticsStep,
+		Step dailyBillingStep,
+		ThreadPoolMonitoringListener threadPoolMonitoringListener) {
 		return new JobBuilder("videoStatisticsJob", jobRepository)
 			.incrementer(new RunIdIncrementer())
 			.start(dailyStatisticsStep)
 			.next(dailyBillingStep)
 			.validator(new UniqueJobParametersValidator())
+			.listener(threadPoolMonitoringListener)
 			.build();
 	}
 
@@ -96,7 +100,7 @@ public class BatchConfig {
 		StatisticJobListener statisticJobListener
 	) {
 		return new StepBuilder("dailyBillingStep", jobRepository)
-			.<VideoStatistic, VideoBill>chunk(10, transactionManager)
+			.<VideoStatistic, VideoBill>chunk(100, transactionManager)
 			.reader(videoStatisticsReader)
 			.processor(dailyBillingProcessor)
 			.writer(dailyBillingWriter)
@@ -126,10 +130,12 @@ public class BatchConfig {
 	public TaskExecutor threadPoolTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(10);
-		executor.setMaxPoolSize(20);
-		executor.setQueueCapacity(30);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(25);
 		executor.setThreadNamePrefix("billing-thread-");
 		executor.initialize();
+		log.info("Initialized ThreadPoolTaskExecutor with core pool size: {}, max pool size: {}",
+			executor.getCorePoolSize(), executor.getMaxPoolSize());
 		return executor;
 	}
 
