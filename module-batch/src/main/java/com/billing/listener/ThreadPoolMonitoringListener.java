@@ -15,13 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ThreadPoolMonitoringListener implements JobExecutionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(ThreadPoolMonitoringListener.class);
-	private final TaskExecutor taskExecutor;
+	private final ThreadPoolTaskExecutor taskExecutor;
 	private volatile boolean isJobRunning = false;
 	private final AtomicInteger lastActiveCount = new AtomicInteger(0);
 	private final AtomicInteger lastCompletedTaskCount = new AtomicInteger(0);
 	private final AtomicInteger lastQueueSize = new AtomicInteger(0);
 
-	public ThreadPoolMonitoringListener(@Qualifier("threadPoolTaskExecutor") TaskExecutor taskExecutor) {
+	public ThreadPoolMonitoringListener(@Qualifier("threadPoolTaskExecutor") ThreadPoolTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 

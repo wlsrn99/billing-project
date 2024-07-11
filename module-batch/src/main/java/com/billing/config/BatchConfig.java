@@ -20,12 +20,12 @@ import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
+import com.billing.listener.MetricsStepExecutionListener;
 import com.billing.listener.StatisticJobListener;
 import com.billing.listener.ThreadPoolMonitoringListener;
 import com.billing.validator.UniqueJobParametersValidator;
@@ -67,7 +67,8 @@ public class BatchConfig {
 	public Job videoStatisticsJob(
 		Step dailyStatisticsStep,
 		Step dailyBillingStep,
-		ThreadPoolMonitoringListener threadPoolMonitoringListener) {
+		ThreadPoolMonitoringListener threadPoolMonitoringListener
+	) {
 		return new JobBuilder("videoStatisticsJob", jobRepository)
 			.incrementer(new RunIdIncrementer())
 			.start(dailyStatisticsStep)
@@ -96,8 +97,9 @@ public class BatchConfig {
 		JpaPagingItemReader<VideoStatistic> videoStatisticsReader,
 		ItemProcessor<VideoStatistic, VideoBill> dailyBillingProcessor,
 		ItemWriter<VideoBill> dailyBillingWriter,
-		TaskExecutor threadPoolTaskExecutor,
-		StatisticJobListener statisticJobListener
+		ThreadPoolTaskExecutor threadPoolTaskExecutor,
+		StatisticJobListener statisticJobListener,
+		MetricsStepExecutionListener metricsStepExecutionListener
 	) {
 		return new StepBuilder("dailyBillingStep", jobRepository)
 			.<VideoStatistic, VideoBill>chunk(100, transactionManager)
@@ -106,28 +108,12 @@ public class BatchConfig {
 			.writer(dailyBillingWriter)
 			.taskExecutor(threadPoolTaskExecutor)
 			.listener(statisticJobListener)
-			.listener(new StepExecutionListener() {
-				// Job 파라미터를 확인하여 이 스텝이 이전에 실패한 스텝인지 확인
-				@Override
-				public void beforeStep(StepExecution stepExecution) {
-					String failedStep = stepExecution.getJobParameters().getString("failedStep", "");
-					if (!failedStep.isEmpty() && !failedStep.equals(stepExecution.getStepName())) {
-						//스텝의 상태를 COMPLETED로 설정하여 재실행을 방지
-						stepExecution.setStatus(BatchStatus.COMPLETED);
-						stepExecution.setExitStatus(ExitStatus.COMPLETED);
-					}
-				}
-
-				@Override
-				public ExitStatus afterStep(StepExecution stepExecution) {
-					return stepExecution.getExitStatus();
-				}
-			})
+			.listener(metricsStepExecutionListener)
 			.build();
 	}
 
 	@Bean
-	public TaskExecutor threadPoolTaskExecutor() {
+	public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(10);
 		executor.setMaxPoolSize(10);
@@ -138,5 +124,7 @@ public class BatchConfig {
 			executor.getCorePoolSize(), executor.getMaxPoolSize());
 		return executor;
 	}
+
+
 
 }

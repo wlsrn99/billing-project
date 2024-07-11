@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 15s  # 전역 스크래핑 간격 설정
+
+scrape_configs:
+  - job_name: 'spring-batch-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8081']  # Spring Batch 애플리케이션 주소
+    metric_relabel_configs:
+      # Job 관련 메트릭
+      - source_labels: [__name__, job_name]
+        regex: 'batch_job_(start|finish)_total;(.+)'
+        replacement: '${2}'
+        target_label: batch_job_name
+      - source_labels: [__name__]
+        regex: 'batch_job_duration_seconds.*'
+        replacement: 'batch_job'
+        target_label: metric_type
+
+      # Step 관련 메트릭
+      - source_labels: [__name__, step_name]
+        regex: 'batch_step_(start|finish)_total;(.+)'
+        replacement: '${2}'
+        target_label: batch_step_name
+      - source_labels: [__name__]
+        regex: 'batch_step_duration_seconds.*'
+        replacement: 'batch_step'
+        target_label: metric_type
+
+      # 읽기, 쓰기, 커밋 카운트 메트릭
+      - source_labels: [__name__]
+        regex: 'batch_step_(read|write|commit)_count'
+        replacement: '${1}_count'
+        target_label: count_type
+
+      # 공통 레이블 추가
+      - target_label: application
+        replacement: 'spring-batch-app'
+
+      # custom 접두사가 붙은 메트릭만 포함
+      - source_labels: [__name__]
+        regex: 'custom_.*'
+        action: keep

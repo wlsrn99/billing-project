@@ -25,8 +25,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-batch'
 
     //Actuator, Prometheus
-//    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-//    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
     //JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

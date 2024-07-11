@@ -30,8 +30,7 @@ public class BatchScheduler {
 	private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
 
-	// @Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시에 실행
-	@Scheduled(fixedRate = 200000) // 200초마다 실행
+	@Scheduled(cron = "0 17 22 * * *", zone = "Asia/Seoul")
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");
