@@ -1,16 +1,23 @@
 package com.billing.repository;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.billing.dto.VideoBillingDTO;
 import com.billing.entity.Video;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
+	@Query("SELECT new com.billing.dto.VideoBillingDTO(v.id, v.viewCount, v.adCount) FROM Video v")
+	List<VideoBillingDTO> findAllViewAndAdCountsPaged(Pageable pageable);
+
 	@Query("SELECT v.viewCount FROM Video v WHERE v.id = :id")
-	long findViewCountById(@Param("id") Long id);
+	Long findViewCountById(@Param("id") Long id);
 
 	@Query("SELECT v.adCount FROM Video v WHERE v.id = :id")
-	long findAdCountById(@Param("id") Long videoId);
+	Long findAdCountById(@Param("id") Long id);
 }
 

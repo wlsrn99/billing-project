@@ -2,6 +2,7 @@ package com.billing.reader;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,15 +44,13 @@ public class DailyStatisticsReaderConfig {
 	public JpaPagingItemReader<VideoStatistic> videoStatisticsReader(
 		@Value("#{jobParameters['date']}") LocalDate date,
 		@Value("#{jobParameters['chunkSize']}") int chunkSize) {
-		JpaPagingItemReader<VideoStatistic> reader = new JpaPagingItemReader<>();
-		reader.setQueryString(
-			"SELECT vs " +
-				"FROM VideoStatistic vs " +
-				"WHERE vs.date = :date"
-		);
-		reader.setParameterValues(Collections.singletonMap("date", date));
-		reader.setEntityManagerFactory(entityManagerFactory);
-		reader.setPageSize(chunkSize); // jobParameters로부터 가져온 chunk 크기로 설정
-		return reader;
+		return new JpaPagingItemReaderBuilder<VideoStatistic>()
+			.name("videoStatisticsReader")
+			.entityManagerFactory(entityManagerFactory)
+			.queryString("SELECT vs FROM VideoStatistic vs WHERE vs.date = :date")
+			.parameterValues(Collections.singletonMap("date", date))
+			.pageSize(chunkSize)
+			.saveState(false) // 멀티스레드 환경에서 안전하게 동작하도록 상태 저장 비활성화
+			.build();
 	}
 }

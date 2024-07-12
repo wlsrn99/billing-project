@@ -1,0 +1,8 @@
+FROM prom/prometheus-linux-arm64:main
+
+COPY prometheus.yml /etc/prometheus/prometheus.yml
+
+EXPOSE 9090
+
+ENTRYPOINT ["/bin/prometheus"]
+CMD ["--config.file=/etc/prometheus/prometheus.yml"]
