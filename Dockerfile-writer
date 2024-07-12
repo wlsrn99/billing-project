@@ -1,0 +1,4 @@
+FROM mysql:8
+
+COPY writer.cnf /etc/mysql/my.cnf
+COPY writer-init.sql /docker-entrypoint-initdb.d/

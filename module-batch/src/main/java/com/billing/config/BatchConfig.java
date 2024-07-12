@@ -1,10 +1,13 @@
 package com.billing.config;
 
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -17,17 +20,23 @@ import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
+import com.billing.listener.MetricsStepExecutionListener;
 import com.billing.listener.StatisticJobListener;
+import com.billing.listener.ThreadPoolMonitoringListener;
+import com.billing.validator.UniqueJobParametersValidator;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableBatchProcessing
+@Slf4j
 public class BatchConfig {
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
@@ -51,16 +60,21 @@ public class BatchConfig {
 	 *
 	 * @param dailyStatisticsStep 통계 데이터를 만드는 step
 	 * @param dailyBillingStep 정산데이터를 만드는 step
-	 * @param statisticJobListener job과 step에 대한 상태 체크, Job 실패 시 재시작 로직
+	 *
 	 * @return
 	 */
 	@Bean
-	public Job videoStatisticsJob(Step dailyStatisticsStep, Step dailyBillingStep, StatisticJobListener statisticJobListener) {
+	public Job videoStatisticsJob(
+		Step dailyStatisticsStep,
+		Step dailyBillingStep,
+		ThreadPoolMonitoringListener threadPoolMonitoringListener
+	) {
 		return new JobBuilder("videoStatisticsJob", jobRepository)
 			.incrementer(new RunIdIncrementer())
-			.listener(statisticJobListener)
 			.start(dailyStatisticsStep)
 			.next(dailyBillingStep)
+			.validator(new UniqueJobParametersValidator())
+			.listener(threadPoolMonitoringListener)
 			.build();
 	}
 
@@ -82,13 +96,35 @@ public class BatchConfig {
 	public Step dailyBillingStep(
 		JpaPagingItemReader<VideoStatistic> videoStatisticsReader,
 		ItemProcessor<VideoStatistic, VideoBill> dailyBillingProcessor,
-		ItemWriter<VideoBill> dailyBillingWriter
+		ItemWriter<VideoBill> dailyBillingWriter,
+		ThreadPoolTaskExecutor threadPoolTaskExecutor,
+		StatisticJobListener statisticJobListener,
+		MetricsStepExecutionListener metricsStepExecutionListener
 	) {
 		return new StepBuilder("dailyBillingStep", jobRepository)
-			.<VideoStatistic, VideoBill>chunk(10, transactionManager)
+			.<VideoStatistic, VideoBill>chunk(100, transactionManager)
 			.reader(videoStatisticsReader)
 			.processor(dailyBillingProcessor)
 			.writer(dailyBillingWriter)
+			.taskExecutor(threadPoolTaskExecutor)
+			.listener(statisticJobListener)
+			.listener(metricsStepExecutionListener)
 			.build();
 	}
+
+	@Bean
+	public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(10);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(25);
+		executor.setThreadNamePrefix("billing-thread-");
+		executor.initialize();
+		log.info("Initialized ThreadPoolTaskExecutor with core pool size: {}, max pool size: {}",
+			executor.getCorePoolSize(), executor.getMaxPoolSize());
+		return executor;
+	}
+
+
+
 }

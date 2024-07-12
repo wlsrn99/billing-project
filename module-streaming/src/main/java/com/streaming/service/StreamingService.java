@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.streaming.aop.annotations.WriteOnly;
 import com.streaming.dto.CreateRequestDTO;
 import com.streaming.dto.CreateResponseDTO;
 import com.streaming.dto.PauseResponseDTO;
@@ -38,14 +39,15 @@ public class StreamingService {
 	private final VideoAdRepository videoAdRepository;
 	private final AdDetailRepository adDetailRepository;
 
+	@WriteOnly
 	@Transactional
 	public StartResponseDTO playVideo(Long userId, Long videoId) {
 		Video video = videoRepository.findById(videoId)
 			.orElseThrow(() -> new VideoNotFoundException(VideoErrorCode.VIDEO_NOT_FOUND));
 
+		// 원자적 연산
 		// 조회수 증가
-		video.increaseViewCount(video.getViewCount() + 1);
-		videoRepository.save(video);
+		videoRepository.incrementViewCount(videoId);
 
 		LocalDate now = LocalDate.now();
 		WatchHistory watchHistory = watchedHistoryRepository.findByUserIdAndVideoIdAndCreatedAt(userId, videoId, now)
@@ -56,11 +58,14 @@ public class StreamingService {
 					.build();
 			});
 
+		LocalDateTime nowTime = LocalDateTime.now();
+		watchHistory.updateWatchedAt(nowTime);
 		watchedHistoryRepository.save(watchHistory);
 
 		return new StartResponseDTO(video, watchHistory.getLastWatchedPosition());
 	}
 
+	@WriteOnly
 	@Transactional
 	public PauseResponseDTO pauseVideo(Long userId, Long videoId) {
 		WatchHistory watchHistory = watchedHistoryRepository.findByRecentHistory(userId, videoId)
@@ -87,12 +92,15 @@ public class StreamingService {
 		//오늘 날짜의 재생한 시간 업데이트
 		watchHistory.updateDuration(endWatched - startWatched);
 
-		//영상 시청 길이에 따라 광고 시청 횟수 증가
+		//영상 시청 길이에 따라 광고 시청 횟수 구하기
 		int adViewCount = getAdViewCount(video, startWatched, endWatched);
 
 		//오늘 날짜의 광고 본 횟수 업데이트
 		watchHistory.updateAdViewCount(adViewCount);
-		video.increaseAdCount(video.getAdCount() + adViewCount);
+
+		// 원자적 연산
+		// 비디오 테이블 광고 조회수 증가
+		videoRepository.incrementAdCount(videoId, adViewCount);
 
 
 		watchedHistoryRepository.save(watchHistory);
@@ -106,6 +114,7 @@ public class StreamingService {
 			.build();
 	}
 
+	@WriteOnly
 	@Transactional
 	public CreateResponseDTO createVideo(Long userId, CreateRequestDTO createRequestDTO) {
 		// 새 비디오 생성

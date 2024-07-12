@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 public enum JobLogMessage {
 	CACHE_CLEARED(LogLevel.INFO, JobStatus.COMPLETED, "job 완료 후 캐시가 지워졌습니다."),
 	JOB_INCOMPLETE(LogLevel.ERROR, JobStatus.FAILED, "job이 성공적으로 완료되지 않았습니다. 실패한 단계를 확인하십시오."),
+	JOB_RESTARTING(LogLevel.ERROR, JobStatus.FAILED, "job을 재시작 합니다"),
 	STEP_FAILED(LogLevel.ERROR, JobStatus.FAILED, "step 실패: {}"),
 	STEP_COMPLETED(LogLevel.INFO, JobStatus.COMPLETED, "step이 성공적으로 완료되었습니다: {}"),
 	JOB_STARTING(LogLevel.INFO, JobStatus.STARTING, "job 시작 중: {}"),
