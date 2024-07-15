@@ -30,13 +30,13 @@ public class BatchScheduler {
 	private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
 
-	@Scheduled(cron = "0 17 22 * * *", zone = "Asia/Seoul")
+	@Scheduled(cron = "0 17 10 * * *", zone = "Asia/Seoul")
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");
 			JobParameters jobParameters = new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
-				.addLocalDate("date", LocalDate.of(2024, 6, 6))
+				.addLocalDate("date", LocalDate.of(2024, 6, 8))
 				.addLong("chunkSize", 100L)
 				.addString("uniqueId", UUID.randomUUID().toString())
 				.toJobParameters();

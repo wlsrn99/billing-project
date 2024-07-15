@@ -1,11 +1,7 @@
 package com.billing.config;
 
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
@@ -26,7 +22,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.billing.entity.VideoBill;
 import com.billing.entity.VideoStatistic;
 import com.billing.listener.MetricsStepExecutionListener;
-import com.billing.listener.StatisticJobListener;
 import com.billing.listener.ThreadPoolMonitoringListener;
 import com.billing.validator.UniqueJobParametersValidator;
 
@@ -50,11 +45,6 @@ public class BatchConfig {
 		return postProcessor;
 	}
 
-
-	@Bean
-	public StatisticJobListener statisticJobListener() {
-		return new StatisticJobListener(jobRepository, jobLauncher, jobRegistry);
-	}
 
 	/**
 	 *
@@ -98,7 +88,6 @@ public class BatchConfig {
 		ItemProcessor<VideoStatistic, VideoBill> dailyBillingProcessor,
 		ItemWriter<VideoBill> dailyBillingWriter,
 		ThreadPoolTaskExecutor threadPoolTaskExecutor,
-		StatisticJobListener statisticJobListener,
 		MetricsStepExecutionListener metricsStepExecutionListener
 	) {
 		return new StepBuilder("dailyBillingStep", jobRepository)
@@ -107,7 +96,6 @@ public class BatchConfig {
 			.processor(dailyBillingProcessor)
 			.writer(dailyBillingWriter)
 			.taskExecutor(threadPoolTaskExecutor)
-			.listener(statisticJobListener)
 			.listener(metricsStepExecutionListener)
 			.build();
 	}
