@@ -6,6 +6,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.billing.entity.VideoBill;
 import com.billing.repository.VideoBillRepository;
@@ -16,25 +19,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.READ_COMMITTED) //기본적인 트랜잭션 격리 수준
 public class DailyBillingWriter implements ItemWriter<VideoBill> {
 	private final VideoBillRepository videoBillRepository;
 
 	@Override
-	// 예외 발생 시 최대 3번 재시도, 재시도 간 1초 대기
-	@Retryable(value = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000))
+	@Transactional(propagation = Propagation.REQUIRES_NEW) //각 write 호출 마다 새로운 트랜잭션 시작
+	@Retryable(value = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000)) // 실패시 최대 3번까지 재시작
 	public void write(Chunk<? extends VideoBill> chunk) throws Exception {
 		try {
-			// 청크의 모든 아이템을 한 번에 저장
 			videoBillRepository.saveAll(chunk.getItems());
 			log.info("Successfully saved {} VideoBill items", chunk.size());
 		} catch (DataIntegrityViolationException e) {
-			// 데이터 무결성 위반 예외 처리
 			log.error("Data integrity violation while saving VideoBill items", e);
-			throw e; // 예외를 다시 던져 재시도 로직 활성화
+			throw e;
 		} catch (Exception e) {
-			// 기타 모든 예외 처리
 			log.error("Error occurred while saving VideoBill items", e);
-			throw e; // 예외를 다시 던져 재시도 로직 활성화
+			throw e;
 		}
 	}
 }

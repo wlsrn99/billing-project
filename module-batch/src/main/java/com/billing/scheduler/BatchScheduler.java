@@ -14,7 +14,6 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -27,10 +26,9 @@ public class BatchScheduler {
 
 	private final JobLauncher jobLauncher;
 	private final JobRegistry jobRegistry;
-	private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
 
-	@Scheduled(cron = "0 17 10 * * *", zone = "Asia/Seoul")
+	@Scheduled(cron = "0 21 2 * * *", zone = "Asia/Seoul")
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");

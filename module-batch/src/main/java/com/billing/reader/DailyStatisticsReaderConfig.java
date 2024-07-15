@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.billing.entity.VideoStatistic;
 
@@ -24,33 +25,50 @@ public class DailyStatisticsReaderConfig {
 	@Bean
 	@StepScope
 	public JpaPagingItemReader<VideoStatistic> watchHistoryReader(
+		@Value("#{stepExecutionContext['startVideoId']}") Long startVideoId,
+		@Value("#{stepExecutionContext['endVideoId']}") Long endVideoId,
 		@Value("#{jobParameters['date']}") LocalDate date,
-		@Value("#{jobParameters['chunkSize']}") int chunkSize) {
-		JpaPagingItemReader<VideoStatistic> reader = new JpaPagingItemReader<>();
-		reader.setQueryString(
-			"SELECT new com.billing.entity.VideoStatistic(w.videoId, w.createdAt, COUNT(w.id), SUM(w.adViewCount), SUM(w.duration)) " +
+		@Value("#{jobParameters['chunkSize']}") Integer chunkSize) {
+		Map<String, Object> parameterValues = new HashMap<>();
+		parameterValues.put("date", date);
+		parameterValues.put("startVideoId", startVideoId);
+		parameterValues.put("endVideoId", endVideoId);
+
+		return new JpaPagingItemReaderBuilder<VideoStatistic>()
+			.name("watchHistoryReader")
+			.entityManagerFactory(entityManagerFactory)
+			.queryString("SELECT new com.billing.entity.VideoStatistic(w.videoId, w.createdAt, COUNT(w.id), SUM(w.adViewCount), SUM(w.duration)) " +
 				"FROM WatchHistory w " +
 				"WHERE w.createdAt = :date " +
-				"GROUP BY w.videoId, w.createdAt"
-		);
-		reader.setParameterValues(Collections.singletonMap("date", date));
-		reader.setEntityManagerFactory(entityManagerFactory);
-		reader.setPageSize(chunkSize); // jobParameters로부터 가져온 chunk 크기로 설정
-		return reader;
+				"AND w.videoId BETWEEN :startVideoId AND :endVideoId " +
+				"GROUP BY w.videoId, w.createdAt")
+			.parameterValues(parameterValues)
+			.pageSize(chunkSize)
+			.saveState(false)
+			.build();
 	}
 
 	@Bean
 	@StepScope
 	public JpaPagingItemReader<VideoStatistic> videoStatisticsReader(
+		@Value("#{stepExecutionContext['startVideoId']}") Long startVideoId,
+		@Value("#{stepExecutionContext['endVideoId']}") Long endVideoId,
 		@Value("#{jobParameters['date']}") LocalDate date,
-		@Value("#{jobParameters['chunkSize']}") int chunkSize) {
+		@Value("#{jobParameters['chunkSize']}") Integer chunkSize) {
+		Map<String, Object> parameterValues = new HashMap<>();
+		parameterValues.put("date", date);
+		parameterValues.put("startVideoId", startVideoId);
+		parameterValues.put("endVideoId", endVideoId);
+
 		return new JpaPagingItemReaderBuilder<VideoStatistic>()
 			.name("videoStatisticsReader")
 			.entityManagerFactory(entityManagerFactory)
-			.queryString("SELECT vs FROM VideoStatistic vs WHERE vs.date = :date")
-			.parameterValues(Collections.singletonMap("date", date))
+			.queryString("SELECT v FROM VideoStatistic v " +
+				"WHERE v.date = :date " +
+				"AND v.videoId BETWEEN :startVideoId AND :endVideoId")
+			.parameterValues(parameterValues)
 			.pageSize(chunkSize)
-			.saveState(false) // 멀티스레드 환경에서 안전하게 동작하도록 상태 저장 비활성화
+			.saveState(false)
 			.build();
 	}
 }
