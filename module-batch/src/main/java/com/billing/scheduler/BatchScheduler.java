@@ -28,14 +28,14 @@ public class BatchScheduler {
 	private final JobRegistry jobRegistry;
 
 
-	@Scheduled(cron = "0 21 2 * * *", zone = "Asia/Seoul")
+	@Scheduled(cron = "0 7 3 * * *", zone = "Asia/Seoul")
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");
 			JobParameters jobParameters = new JobParametersBuilder()
 				.addLong("time", System.currentTimeMillis())
-				.addLocalDate("date", LocalDate.of(2024, 6, 8))
-				.addLong("chunkSize", 100L)
+				.addLocalDate("date", LocalDate.of(2024, 6, 2))
+				.addLong("chunkSize", 1000L)
 				.addString("uniqueId", UUID.randomUUID().toString())
 				.toJobParameters();
 

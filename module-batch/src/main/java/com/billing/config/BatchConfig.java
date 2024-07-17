@@ -15,7 +15,8 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class BatchConfig extends DefaultBatchConfiguration {
-	private final EntityManagerFactory entityManagerFactory;
 	private final DailyStatisticsReaderConfig readerConfig;
 
 	@Override
@@ -62,7 +62,7 @@ public class BatchConfig extends DefaultBatchConfiguration {
 	@StepScope
 	public DailyStatisticsPartitioner dailyStatisticsPartitioner(
 		@Value("#{jobParameters['date']}") LocalDate date,
-		@Value("${batch.gridSize:100}") int gridSize) {
+		@Value("${batch.gridSize:5}") int gridSize) {
 		return new DailyStatisticsPartitioner(getDataSource(), gridSize, date);
 	}
 
@@ -70,7 +70,7 @@ public class BatchConfig extends DefaultBatchConfiguration {
 	@StepScope
 	public DailyBillingPartitioner dailyBillingPartitioner(
 		@Value("#{jobParameters['date']}") LocalDate date,
-		@Value("${batch.gridSize:100}") int gridSize) {
+		@Value("${batch.gridSize:5}") int gridSize) {
 		return new DailyBillingPartitioner(getDataSource(), gridSize, date);
 	}
 
@@ -95,7 +95,7 @@ public class BatchConfig extends DefaultBatchConfiguration {
 		JobRepository jobRepository,
 		Step dailyStatisticsSlaveStep,
 		Partitioner dailyStatisticsPartitioner,
-		@Value("${batch.gridSize:100}") int gridSize) {
+		@Value("${batch.gridSize:5}") int gridSize) {
 		return new StepBuilder("partitionedDailyStatisticsStep", jobRepository)
 			.partitioner("dailyStatisticsSlaveStep", dailyStatisticsPartitioner)
 			.step(dailyStatisticsSlaveStep)
@@ -109,7 +109,7 @@ public class BatchConfig extends DefaultBatchConfiguration {
 		JobRepository jobRepository,
 		Step dailyBillingSlaveStep,
 		Partitioner dailyBillingPartitioner,
-		@Value("${batch.gridSize:100}") int gridSize) {
+		@Value("${batch.gridSize:5}") int gridSize) {
 		return new StepBuilder("partitionedDailyBillingStep", jobRepository)
 			.partitioner("dailyBillingSlaveStep", dailyBillingPartitioner)
 			.step(dailyBillingSlaveStep)
@@ -121,11 +121,11 @@ public class BatchConfig extends DefaultBatchConfiguration {
 	@Bean
 	public Step dailyStatisticsSlaveStep(
 		JobRepository jobRepository,
-		JpaPagingItemReader<VideoStatistic> watchHistoryReader,
+		JdbcPagingItemReader<VideoStatistic> watchHistoryReader,
 		ItemProcessor<VideoStatistic, VideoStatistic> dailyStatisticsProcessor,
 		ItemWriter<VideoStatistic> dailyStatisticWriter,
 		MetricsStepExecutionListener metricsStepExecutionListener,
-		@Value("${batch.chunkSize:100}") int chunkSize
+		@Value("${batch.chunkSize:1000}") int chunkSize
 	) {
 		return new StepBuilder("dailyStatisticsSlaveStep", jobRepository)
 			.<VideoStatistic, VideoStatistic>chunk(chunkSize, getTransactionManager())
@@ -139,11 +139,11 @@ public class BatchConfig extends DefaultBatchConfiguration {
 	@Bean
 	public Step dailyBillingSlaveStep(
 		JobRepository jobRepository,
-		JpaPagingItemReader<VideoStatistic> videoStatisticsReader,
+		JdbcPagingItemReader<VideoStatistic> videoStatisticsReader,
 		ItemProcessor<VideoStatistic, VideoBill> dailyBillingProcessor,
 		ItemWriter<VideoBill> dailyBillingWriter,
 		MetricsStepExecutionListener metricsStepExecutionListener,
-		@Value("${batch.chunkSize:100}") int chunkSize
+		@Value("${batch.chunkSize:1000}") int chunkSize
 	) {
 		return new StepBuilder("dailyBillingSlaveStep", jobRepository)
 			.<VideoStatistic, VideoBill>chunk(chunkSize, getTransactionManager())
@@ -158,7 +158,7 @@ public class BatchConfig extends DefaultBatchConfiguration {
 	public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(5);
-		executor.setMaxPoolSize(5);
+		executor.setMaxPoolSize(8); //m1칩의 cpu 수
 		executor.setQueueCapacity(25);
 		executor.setThreadNamePrefix("billing-thread-");
 		executor.initialize();

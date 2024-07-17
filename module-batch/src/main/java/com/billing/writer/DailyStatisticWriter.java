@@ -1,41 +1,49 @@
 package com.billing.writer;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.billing.entity.VideoStatistic;
-import com.billing.repository.VideoStatisticRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.READ_COMMITTED) //기본적인 트랜잭션 격리 수준
 public class DailyStatisticWriter implements ItemWriter<VideoStatistic> {
-	private final VideoStatisticRepository videoStatisticRepository;
+	private final JdbcTemplate jdbcTemplate;
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW) //각 write 호출 마다 새로운 트랜잭션 시작
-	@Retryable(value = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000)) // 실패시 최대 3번까지 재시작
-	public void write(Chunk<? extends VideoStatistic> chunk) throws Exception {
-		try {
-			videoStatisticRepository.saveAll(chunk.getItems());
-			log.info("Successfully saved {} VideoStatistic items", chunk.size());
-		} catch (DataIntegrityViolationException e) {
-			log.error("Data integrity violation while saving VideoStatistic items", e);
-			throw e; // 예외를 다시 던져 재시도 로직 활성화
-		} catch (Exception e) {
-			log.error("Error occurred while saving VideoStatistic items", e);
-			throw e; // 예외를 다시 던져 재시도 로직 활성화
-		}
+	@Transactional
+	public void write(Chunk<? extends VideoStatistic> chunk) {
+		String sql = "INSERT INTO video_statistics (video_id, date, daily_view_count, daily_ad_view_count, daily_duration) " +
+			"VALUES (?, ?, ?, ?, ?) " +
+			"ON DUPLICATE KEY UPDATE " +
+			"daily_view_count = VALUES(daily_view_count), " +
+			"daily_ad_view_count = VALUES(daily_ad_view_count), " +
+			"daily_duration = VALUES(daily_duration)";
+
+		jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int i) throws SQLException {
+				VideoStatistic stat = chunk.getItems().get(i);
+				ps.setLong(1, stat.getVideoId());
+				ps.setDate(2, java.sql.Date.valueOf(stat.getDate()));
+				ps.setLong(3, stat.getDailyViewCount());
+				ps.setLong(4, stat.getDailyAdViewCount());
+				ps.setLong(5, stat.getDailyDuration());
+			}
+
+			@Override
+			public int getBatchSize() {
+				return chunk.getItems().size();
+			}
+		});
 	}
 }
