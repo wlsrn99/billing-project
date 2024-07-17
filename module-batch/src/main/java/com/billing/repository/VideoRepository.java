@@ -1,23 +1,26 @@
 package com.billing.repository;
 
-import java.util.List;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import com.billing.dto.VideoBillingDTO;
-import com.billing.entity.Video;
 
-public interface VideoRepository extends JpaRepository<Video, Long> {
-	@Query("SELECT new com.billing.dto.VideoBillingDTO(v.id, v.viewCount, v.adCount) FROM Video v")
-	List<VideoBillingDTO> findAllViewAndAdCountsPaged(Pageable pageable);
+import lombok.RequiredArgsConstructor;
 
-	@Query("SELECT v.viewCount FROM Video v WHERE v.id = :id")
-	Long findViewCountById(@Param("id") Long id);
+@Repository
+@RequiredArgsConstructor
+public class VideoRepository {
 
-	@Query("SELECT v.adCount FROM Video v WHERE v.id = :id")
-	Long findAdCountById(@Param("id") Long id);
+	private final JdbcTemplate jdbcTemplate;
+
+	public Long findViewCountById(Long id) {
+		String sql = "SELECT view_count FROM videos WHERE videos.video_id = ?";
+		return jdbcTemplate.queryForObject(sql, Long.class, id);
+	}
+
+	public Long findAdCountById(Long id) {
+		String sql = "SELECT ad_count FROM videos WHERE videos.video_id = ?";
+		return jdbcTemplate.queryForObject(sql, Long.class, id);
+	}
 }
 
