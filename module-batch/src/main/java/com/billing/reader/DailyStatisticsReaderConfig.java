@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,40 +34,43 @@ public class DailyStatisticsReaderConfig {
 		@Value("#{jobParameters['date']}") LocalDate date,
 		@Value("#{jobParameters['chunkSize']}") Integer chunkSize) throws Exception {
 
-		String partitionName = "p" + date.toString().replace("-", "");
-
 		Map<String, Object> parameterValues = new HashMap<>();
-		parameterValues.put("date", date);
 		parameterValues.put("startVideoId", startVideoId);
 		parameterValues.put("endVideoId", endVideoId);
 
-		return new JdbcPagingItemReaderBuilder<VideoStatistic>()
-			.name("watchHistoryReader")
-			.dataSource(dataSource)
-			.queryProvider(createWatchHistoryQueryProvider(partitionName))
-			.parameterValues(parameterValues)
-			.pageSize(chunkSize)
-			.rowMapper((rs, rowNum) -> new VideoStatistic(
-				rs.getLong("video_id"),
-				rs.getDate("created_at").toLocalDate(),
-				rs.getLong("daily_view_count"),
-				rs.getLong("daily_ad_view_count"),
-				rs.getLong("daily_duration")
-			))
-			.build();
+		String partitionDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
+
+		try {
+			return new JdbcPagingItemReaderBuilder<VideoStatistic>()
+				.name("watchHistoryReader")
+				.dataSource(dataSource)
+				.queryProvider(createWatchHistoryQueryProvider(partitionDate))
+				.parameterValues(parameterValues)
+				.pageSize(chunkSize)
+				.rowMapper((rs, rowNum) -> new VideoStatistic(
+					rs.getLong("video_id"),
+					date,
+					rs.getLong("daily_view_count"),
+					rs.getLong("daily_ad_view_count"),
+					rs.getLong("daily_duration")
+				))
+				.build();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to create watchHistoryReader", e);
+		}
 	}
 
-	private PagingQueryProvider createWatchHistoryQueryProvider(String partitionName) throws Exception {
+	private PagingQueryProvider createWatchHistoryQueryProvider(String partitionDate) throws Exception {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
 		factory.setSelectClause("SELECT /*+ INDEX(w idx_watch_history_video_id_created_at) */ " +
-			"w.video_id, w.created_at, " +
+			"w.video_id, " +
 			"COUNT(DISTINCT w.id) as daily_view_count, " +
 			"SUM(w.ad_view_count) as daily_ad_view_count, " +
 			"SUM(w.duration) as daily_duration");
-		factory.setFromClause("FROM watch_history PARTITION(" + partitionName + ") w");
-		factory.setWhereClause("WHERE w.created_at = :date AND w.video_id BETWEEN :startVideoId AND :endVideoId");
-		factory.setGroupClause("GROUP BY w.video_id, w.created_at");
+		factory.setFromClause("FROM watch_history PARTITION(p" + partitionDate + ") w");
+		factory.setWhereClause("WHERE w.video_id BETWEEN :startVideoId AND :endVideoId");
+		factory.setGroupClause("GROUP BY w.video_id");
 		factory.setSortKey("video_id");
 
 		return factory.getObject();
