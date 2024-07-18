@@ -7,24 +7,46 @@
 
 ## 📌 프로젝트 소개
 - 대량(1억 건)의 영상 시청 기록에 대한 통계 및 정산 Batch 작업
-- [**97.42%** 배치 작업 성능 개선](#performance-improvement)
+- ### [**97.42%** 배치 작업 성능 개선](#performance-improvement)
 
 ## 🔥 프로젝트 목표
-- 1억 건의 데이터에 대한 배치 작업을 2분대로 처리
+-  1억 건의 데이터에 대한 배치 작업을 2분대로 처리
 
 
-## 🛠️ 주요 기능
-1. 통계 및 정산 기능
- 
-    a. 플랫폼 스레드 활용
-    
-    b. [chunk read 동시성 제어]
+## ⚒️기능 소개
 
-    c. [DB Partitioning]
+### 1. 통계 및 정산 기능
+- **플랫폼 스레드 활용**
+- **chunk read 동시성 제어**
+- **DB Partitioning**
 
+### 2. 부하 분산 및 서비스 매핑 기능
 
+<details>
+<summary><b>Spring Cloud Gateway</b></summary>
+<ul>
+<li>중앙 집중식 인증 및 권한 부여, JWT 토큰 검증</li>
+<li>로드 밸런싱: 라운드 로빈 방식으로 트래픽 분산</li>
+</ul>
+</details>
 
-2. 부하 분산 및 서비스 매핑 기능 <details> <summary><b>Spring Cloud Gateway</b></summary> <ul> <li>중앙 집중식 인증 및 권한 부여, JWT 토큰 검증</li> <li>로드 밸런싱: 라운드 로빈 방식으로 트래픽 분산</li> </ul> </details> <details> <summary><b>Spring Cloud Eureka</b></summary> <ul> <li>Eureka 서비스 ID를 활용한 자동 서비스 매핑 <ul> <li>Eureka에 등록된 서비스 ID를 활용하여 요청을 자동으로 해당 서비스로 매핑</li> </ul> </li> <li>Eureka Server를 통한 서비스 디스커버리 <ul> <li>서비스 자동 등록 및 검색</li> <li>서비스 헬스 체크 및 실시간 상태 모니터링</li> </ul> </li> </ul> </details>
+<details>
+<summary><b>Spring Cloud Eureka</b></summary>
+<ul>
+<li>Eureka 서비스 ID를 활용한 자동 서비스 매핑
+  <ul>
+  <li>Eureka에 등록된 서비스 ID를 활용하여 요청을 자동으로 해당 서비스로 매핑</li>
+  <li>streaming-service 멀티 프로세스를 동일한 serviceId로 매핑하여 효율적인 부하 분산</li>
+  </ul>
+</li>
+<li>Eureka Server를 통한 서비스 디스커버리
+  <ul>
+  <li>서비스 자동 등록 및 검색</li>
+  <li>서비스 헬스 체크 및 실시간 상태 모니터링</li>
+  </ul>
+</li>
+</ul>
+</details>
 
 
 3. 📚 API 명세서
@@ -112,7 +134,7 @@
    - 데이터베이스 호출 횟수 감소
 
 ### 성능 개선 결과
- ✅1억건 기준 2분 3초 895밀리초
+✅1억 건 기준 실측 결과: 2분 3초 895밀리초
 
 | 작업                 | 최적화 전 | 1차 최적화 후 | 2차 최적화 후 | 3차 최적화 후  | 최종 개선율 |
 |--------------------|-----------|---------------|---------|-----------|-------------|
