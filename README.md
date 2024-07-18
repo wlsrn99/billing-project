@@ -1,12 +1,13 @@
 # 정산 시스템 프로젝트
-**June 2024 ~ July 2024** 
+
+📅 **2024년 6월 ~ 2024년 7월** (4주)
 
 <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white"><img src="https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=spring&logoColor=white"><img src="https://img.shields.io/badge/Spring Cloud-6DB33F?style=for-the-badge&logo= &logoColor=white"><img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=Spring Security&logoColor=white"><img src="https://img.shields.io/badge/JPA-59666C?style=for-the-badge&logo=Hibernate&logoColor=white"><img src="https://img.shields.io/badge/QueryDSL-0769AD?style=for-the-badge&logo=Java&logoColor=white"><img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"><img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"><img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white"><img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white">
 
 
 ## 📌 프로젝트 소개
 - 대량(1억 건)의 영상 시청 기록에 대한 통계 및 정산 Batch 작업
-- 40분 이상에서 2m3s895ms로 97.42% 배치 성능 개선
+- [**97.42%** 배치 작업 성능 개선](#performance-improvement)
 
 ## 🔥 프로젝트 목표
 - 1억 건의 데이터에 대한 배치 작업을 2분대로 처리
@@ -33,7 +34,7 @@
 ## 🔍 아키텍처
 ![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
 
-## ⚔️성능 개선
+<h2 id="performance-improvement">⚔️성능 개선</h2>
 
 ### 초기 상황
 - 5천만 개 데이터 기준 통계 테이블 생성 시간: 약 40분
