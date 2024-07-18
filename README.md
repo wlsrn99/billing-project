@@ -9,7 +9,7 @@
 <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white">
 <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white">
 <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white">
-<br>
+
 
 ## 📌 프로젝트 소개
 - 대량(1억건)의 영상 시청기록에 대한 통계 및 정산 Batch 작업
