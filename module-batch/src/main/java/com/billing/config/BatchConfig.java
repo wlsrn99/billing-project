@@ -122,7 +122,6 @@ public class BatchConfig extends DefaultBatchConfiguration {
 	public Step dailyStatisticsSlaveStep(
 		JobRepository jobRepository,
 		JdbcPagingItemReader<VideoStatistic> watchHistoryReader,
-		ItemProcessor<VideoStatistic, VideoStatistic> dailyStatisticsProcessor,
 		ItemWriter<VideoStatistic> dailyStatisticWriter,
 		MetricsStepExecutionListener metricsStepExecutionListener,
 		@Value("${batch.chunkSize:1000}") int chunkSize
@@ -130,7 +129,6 @@ public class BatchConfig extends DefaultBatchConfiguration {
 		return new StepBuilder("dailyStatisticsSlaveStep", jobRepository)
 			.<VideoStatistic, VideoStatistic>chunk(chunkSize, getTransactionManager())
 			.reader(watchHistoryReader)
-			.processor(dailyStatisticsProcessor)
 			.writer(dailyStatisticWriter)
 			.listener(metricsStepExecutionListener)
 			.build();
