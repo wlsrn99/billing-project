@@ -5,7 +5,11 @@
 
 
 ## 📌 프로젝트 소개
-- 대량(1억건)의 영상 시청기록에 대한 통계 및 정산 Batch 작업
+- 대량(1억 건)의 영상 시청 기록에 대한 통계 및 정산 Batch 작업
+- 40분 이상에서 2m3s895ms로 97.42% 배치 성능 개선
+
+## 🔥 프로젝트 목표
+- 1억 건의 데이터에 대한 배치 작업을 2분대로 처리
 
 
 ## 🛠️ 주요 기능
@@ -29,3 +33,94 @@
 ## 🔍 아키텍처
 ![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
 
+## ⚔️성능 개선
+
+### 초기 상황
+- 5천만 개 데이터 기준 통계 테이블 생성 시간: 약 40분
+### 결과
+- 1억 개 데이터 기준 통계+정산 테이블 생성 시간: 약 2분
+
+<details>
+<summary><b>1차 성능 개선</b></summary>
+
+### 최적화 전략
+1. Spring Batch 파티셔닝 도입
+   - VideoId를 기준으로 데이터 파티셔닝
+   - Chunk 크기 조정: 100 → 1,000
+
+### 최적화 결과
+| 작업 | 최적화 전 | 최적화 후 | 개선율 |
+|------|-------|-----------|--------|
+| 통계 작업 | 40분   | 22분 | 45% ↓ |
+| 정산 작업 | 로그 에러 | 15분 | - |
+| **총 소요 시간** | 40분+  | **37분 12초** | 7%+ ↓ |
+
+</details>
+
+<details>
+<summary><b>2차 성능 개선</b></summary>
+
+### 최적화 전략
+1. 데이터베이스 레벨 최적화
+   - 인덱스 생성: `CREATE INDEX idx_watch_history_date_video ON watch_history(created_at, video_id);`
+   - 서브쿼리를 사용한 데이터 필터링 후 집계 수행
+
+2. 쿼리 최적화
+   ```sql
+   SELECT new com.billing.entity.VideoStatistic(
+       w.videoId, 
+       w.createdAt, 
+       COUNT(w.id), 
+       SUM(w.adViewCount), 
+       SUM(w.duration)
+   ) 
+   FROM (
+       SELECT w.videoId, w.createdAt, w.id, w.adViewCount, w.duration
+       FROM WatchHistory w 
+       WHERE w.createdAt = :date 
+         AND w.videoId BETWEEN :startVideoId AND :endVideoId
+   ) w
+   GROUP BY w.videoId, w.createdAt
+   ```
+   ### 최적화 결과
+| 작업 | 최적화 전 | 1차 최적화 후 | 2차 최적화 후 | 최종 개선율 |
+|------|-------|---------------|---------|-------------|
+| 통계 + 정산 작업 (5천만 건) | 40분+  | 37분 12초 | 10분 40초 | 73.33% ↓ |
+</details>
+
+<details>
+<summary><strong>3차 성능 개선</strong></summary>
+
+### 최적화 전략
+
+1. JPA 사용 제거
+   - JDBC를 사용하는 방식으로 수정
+   - chunkSize를 1000으로 설정
+   - 스레드 안정성을 위해 JdbcPagingItemReader 사용
+
+2. 파티션 프루닝 적용
+   - SQL 쿼리에 파티션 지정: `FROM watch_history PARTITION(p:partitionDate) w`
+
+3. 통계 로직 step의 processor 제거
+   - 불필요한 메서드 호출 제거
+   - 객체 생성 및 관리 비용 감소
+   - 메모리 사용 감소
+
+4. Writer에서 벌크 연산 사용
+   - 여러 레코드를 하나의 SQL 문으로 삽입
+   - 데이터베이스 호출 횟수 감소
+
+### 성능 개선 결과
+ ✅1억건 기준 2분 3초 895밀리초
+
+| 작업                 | 최적화 전 | 1차 최적화 후 | 2차 최적화 후 | 3차 최적화 후  | 최종 개선율 |
+|--------------------|-----------|---------------|---------------|-----------|-------------|
+| 통계 + 정산 작업 (5천만 건) | 40분+ | 37분 12초 | 10분 40초 127밀리초 | 1분 1초(추정) | 97.42% ↓ |
+
+3차 최적화 결과는 1억 건 기준 실측치를 바탕으로 5천만 건에 대해 선형적으로 추정한 값입니다.
+최종 개선율은 최적화 전 시간(40분)과 3차 최적화 후 추정 시간을 비교하여 계산했습니다.
+
+</details>
+
+> 📚 **과정 상세 정보**  
+> 자세한 내용은 [Notion](https://www.notion.so/9e7b94b212764f31b2f76cc9dc8a7a8f)에 있습니다
