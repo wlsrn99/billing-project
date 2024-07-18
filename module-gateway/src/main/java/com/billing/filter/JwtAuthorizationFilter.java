@@ -108,7 +108,7 @@ public class JwtAuthorizationFilter implements WebFilter {
 		String email = exchange.getRequest().getHeaders().getFirst("email");
 
 		return WebClient.builder().build().post()
-			.uri("http://localhost:8081/user/api/refresh")
+			.uri("http://localhost:8080/users/user/api/refresh")
 			.header("email", email)
 			.accept(MediaType.APPLICATION_JSON)
 			.retrieve()
