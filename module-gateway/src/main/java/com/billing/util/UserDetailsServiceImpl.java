@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	private final WebClient webClient;
 
 	public UserDetailsServiceImpl() {
-		this.webClient = WebClient.builder().baseUrl("http://localhost:8081").build();
+		this.webClient = WebClient.builder().baseUrl("http://localhost:8080/users").build();
 	}
 
 	@Override
