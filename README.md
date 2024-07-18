@@ -21,32 +21,7 @@
 - **DB Partitioning**
 
 ### 2. 부하 분산 및 서비스 매핑 기능
-
-<details>
-<summary><b>Spring Cloud Gateway</b></summary>
-<ul>
-<li>중앙 집중식 인증 및 권한 부여, JWT 토큰 검증</li>
-<li>로드 밸런싱: 라운드 로빈 방식으로 트래픽 분산</li>
-</ul>
-</details>
-
-<details>
-<summary><b>Spring Cloud Eureka</b></summary>
-<ul>
-<li>Eureka 서비스 ID를 활용한 자동 서비스 매핑
-  <ul>
-  <li>Eureka에 등록된 서비스 ID를 활용하여 요청을 자동으로 해당 서비스로 매핑</li>
-  <li>streaming-service 멀티 프로세스를 동일한 serviceId로 매핑하여 효율적인 부하 분산</li>
-  </ul>
-</li>
-<li>Eureka Server를 통한 서비스 디스커버리
-  <ul>
-  <li>서비스 자동 등록 및 검색</li>
-  <li>서비스 헬스 체크 및 실시간 상태 모니터링</li>
-  </ul>
-</li>
-</ul>
-</details>
+- <details> <summary><b>Spring Cloud Gateway</b></summary> <ul> <li>중앙 집중식 인증 및 권한 부여, JWT 토큰 검증</li> <li>로드 밸런싱: 라운드 로빈 방식으로 트래픽 분산</li> </ul> </details> <details> <summary><b>Spring Cloud Eureka</b></summary> <ul> <li>Eureka 서비스 ID를 활용한 자동 서비스 매핑 <ul> <li>Eureka에 등록된 서비스 ID를 활용하여 요청을 자동으로 해당 서비스로 매핑</li> <li>streaming-service 멀티 프로세스를 동일한 serviceId로 매핑하여 효율적인 부하 분산</li> </ul> </li> <li>Eureka Server를 통한 서비스 디스커버리 <ul> <li>서비스 자동 등록 및 검색</li> <li>서비스 헬스 체크 및 실시간 상태 모니터링</li> </ul> </li> </ul> </details> <details> <summary><b>Streaming Service CQRS </b></summary> <ul> <li>CQRS (Command Query Responsibility Segregation) 패턴 적용 <ul> <li>명령(쓰기 작업)과 조회(읽기 작업)의 책임 분리</li>  </ul> </li> <li>DB Main-Replica 구조 구현 <ul> <li>Main DB: 쓰기 작업 전담, 데이터 일관성 보장</li> <li>Replica DB: 읽기 작업 전담, 조회 성능 최적화</li> <li>DB 간 ROW단위 실시간 동기화로 데이터 정합성 유지</li> </ul> </li> <li>트래픽 분산 및 가용성 향상 <ul> <li>읽기 작업의 부하를 Replica DB로 분산</li>  </ul> </li> </ul> </details>
 
 
 3. 📚 API 명세서
@@ -56,94 +31,26 @@
 ## 🔍 아키텍처
 ![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
 
-<h2 id="performance-improvement">⚔️성능 개선</h2>
+## ⚔️ 성능 개선 결과
 
-### 초기 상황
-- 5천만 개 데이터 기준 통계 테이블 생성 시간: 약 40분
-### 결과
-- 1억 개 데이터 기준 통계+정산 테이블 생성 시간: 약 2분
+### 📊 최종 성능
+✅ **1억 건 기준 실측 결과: 2m3s895ms**
 
-<details>
-<summary><b>1차 성능 개선</b></summary>
+### 📈 성능 개선 추이
 
-### 최적화 전략
-1. Spring Batch 파티셔닝 도입
-   - VideoId를 기준으로 데이터 파티셔닝
-   - Chunk 크기 조정: 100 → 1,000
+| 단계 | 데이터 규모 | 처리 시간 | 개선율 |
+|------|------------|-----------|--------|
+| 최적화 전 | 5천만 건 | 40분+ | - |
+| 1차 최적화 | 5천만 건 | 37분 12초 | 7%+ ↓ |
+| 2차 최적화 | 5천만 건 | 10분 40초 | 73.33% ↓ |
+| 3차 최적화 | 5천만 건 | 1분 1초 (추정)* | 97.42% ↓ |
 
-### 최적화 결과
-| 작업 | 최적화 전 | 최적화 후 | 개선율 |
-|------|-------|-----------|--------|
-| 통계 작업 | 40분   | 22분 | 45% ↓ |
-| 정산 작업 | 로그 에러 | 15분 | - |
-| **총 소요 시간** | 40분+  | **37분 12초** | 7%+ ↓ |
+- 3차 최적화 결과는 1억 건 기준 실측치를 바탕으로 5천만 건에 대해 선형적으로 추정한 값입니다.
 
-</details>
+### 🚀 주요 개선 포인트
+1. **1차 최적화**: Spring Batch 파티셔닝 도입, Chunk 크기 최적화
+2. **2차 최적화**: 데이터베이스 인덱싱, 쿼리 최적화
+3. **3차 최적화**: JPA 제거, JDBC 직접 사용, 벌크 연산 적용
 
-<details>
-<summary><b>2차 성능 개선</b></summary>
-
-### 최적화 전략
-1. 데이터베이스 레벨 최적화
-   - 인덱스 생성: `CREATE INDEX idx_watch_history_date_video ON watch_history(created_at, video_id);`
-   - 서브쿼리를 사용한 데이터 필터링 후 집계 수행
-
-2. 쿼리 최적화
-   ```sql
-   SELECT new com.billing.entity.VideoStatistic(
-       w.videoId, 
-       w.createdAt, 
-       COUNT(w.id), 
-       SUM(w.adViewCount), 
-       SUM(w.duration)
-   ) 
-   FROM (
-       SELECT w.videoId, w.createdAt, w.id, w.adViewCount, w.duration
-       FROM WatchHistory w 
-       WHERE w.createdAt = :date 
-         AND w.videoId BETWEEN :startVideoId AND :endVideoId
-   ) w
-   GROUP BY w.videoId, w.createdAt
-   ```
-   ### 최적화 결과
-| 작업 | 최적화 전 | 1차 최적화 후 | 2차 최적화 후 | 최종 개선율 |
-|------|-------|---------------|---------|-------------|
-| 통계 + 정산 작업 (5천만 건) | 40분+  | 37분 12초 | 10분 40초 | 73.33% ↓ |
-</details>
-
-<details>
-<summary><strong>3차 성능 개선</strong></summary>
-
-### 최적화 전략
-
-1. JPA 사용 제거
-   - JDBC를 사용하는 방식으로 수정
-   - chunkSize를 1000으로 설정
-   - 스레드 안정성을 위해 JdbcPagingItemReader 사용
-
-2. 파티션 프루닝 적용
-   - SQL 쿼리에 파티션 지정: `FROM watch_history PARTITION(p:partitionDate) w`
-
-3. 통계 로직 step의 processor 제거
-   - 불필요한 메서드 호출 제거
-   - 객체 생성 및 관리 비용 감소
-   - 메모리 사용 감소
-
-4. Writer에서 벌크 연산 사용
-   - 여러 레코드를 하나의 SQL 문으로 삽입
-   - 데이터베이스 호출 횟수 감소
-
-### 성능 개선 결과
-✅1억 건 기준 실측 결과: 2분 3초 895밀리초
-
-| 작업                 | 최적화 전 | 1차 최적화 후 | 2차 최적화 후 | 3차 최적화 후  | 최종 개선율 |
-|--------------------|-----------|---------------|---------|-----------|-------------|
-| 통계 + 정산 작업 (5천만 건) | 40분+ | 37분 12초 | 10분 40초 | 1분 1초(추정) | 97.42% ↓ |
-
-3차 최적화 결과는 1억 건 기준 실측치를 바탕으로 5천만 건에 대해 선형적으로 추정한 값입니다.
-최종 개선율은 최적화 전 시간(40분)과 3차 최적화 후 추정 시간을 비교하여 계산했습니다.
-
-</details>
-
-> 📚 **과정 상세 정보**  
+> 📚 **상세 개선 과정**  
 > 자세한 내용은 [Notion](https://www.notion.so/9e7b94b212764f31b2f76cc9dc8a7a8f)에 있습니다
