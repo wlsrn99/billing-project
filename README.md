@@ -6,7 +6,8 @@
 
 
 ## 📌 프로젝트 소개
-> **대용량 시청기록에 대한 통계 및 정산**
+
+> ### **🚀 대용량 시청기록에 대한 통계 및 정산 시스템**
 
 ### 🛠️ 제공 기능
 
@@ -133,11 +134,11 @@
 
 ### ⚙️️ 주요 기술 스택
 
-<img src="https://img.shields.io/badge/Java-21-007396?style=for-the-badge&logo=java&logoColor=white">
-<img src="https://img.shields.io/badge/Spring%20Boot-3.3.1-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white">
-<img src="https://img.shields.io/badge/Spring%20Cloud%20Gateway-4.1.4-6DB33F?style=for-the-badge&logo=spring&logoColor=white">
-<img src="https://img.shields.io/badge/Spring%20Cloud%20Eureka-4.1.2-6DB33F?style=for-the-badge&logo=spring&logoColor=white">
-<img src="https://img.shields.io/badge/Gradle-8.8-02303A?style=for-the-badge&logo=gradle&logoColor=white">
+![Java](https://img.shields.io/badge/Java-21-007396?style=flat-square&logo=java&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.1-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
+![Spring Cloud Gateway](https://img.shields.io/badge/Spring%20Cloud%20Gateway-4.1.4-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![Spring Cloud Eureka](https://img.shields.io/badge/Spring%20Cloud%20Eureka-4.1.2-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-8.8-02303A?style=flat-square&logo=gradle&logoColor=white)
 
 ### 📘 API 문서
 
