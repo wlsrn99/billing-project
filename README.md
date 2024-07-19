@@ -7,11 +7,11 @@
 
 ## 📌 프로젝트 소개
 
-<blockquote>
+
   <h3 align="center" style="font-weight: bold; color: white; padding: 10px;">
     대용량 시청기록에 대한 통계 및 정산 시스템 
   </h3>
-</blockquote>
+
 
 ### 🛠️ 제공 기능
 
