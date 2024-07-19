@@ -1,6 +1,6 @@
 # 정산 시스템 프로젝트
 
-📅 **2024년 6월 ~ 2024년 7월** (4주)
+📅 **2024년 6월 ~ 2024년 7월**
 
 <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white"><img src="https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=spring&logoColor=white"><img src="https://img.shields.io/badge/Spring Cloud-6DB33F?style=for-the-badge&logo= &logoColor=white"><img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=Spring Security&logoColor=white"><img src="https://img.shields.io/badge/JPA-59666C?style=for-the-badge&logo=Hibernate&logoColor=white"><img src="https://img.shields.io/badge/QueryDSL-0769AD?style=for-the-badge&logo=Java&logoColor=white"><img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"><img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"><img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white"><img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white">
 
@@ -38,7 +38,7 @@
 ## 🏷️ 프로젝트 주요 경험
 
 ### 1. 배치 작업 성능 개선 (97.42% 향상)
-[📚 상세 개선 과정](https://delightful-rotate-bfd.notion.site/9e7b94b212764f31b2f76cc9dc8a7a8f)
+[📚 성능 테스트 과정 상세](https://delightful-rotate-bfd.notion.site/Spring-Batch-63fe19c8c43443669b11a500f1944703)
 
 <details>
 <summary><strong>Quick Overview</strong></summary>
