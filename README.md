@@ -4,21 +4,18 @@
 
 <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white"><img src="https://img.shields.io/badge/Spring%20Batch-6DB33F?style=for-the-badge&logo=spring&logoColor=white"><img src="https://img.shields.io/badge/Spring Cloud-6DB33F?style=for-the-badge&logo= &logoColor=white"><img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=Spring Security&logoColor=white"><img src="https://img.shields.io/badge/JPA-59666C?style=for-the-badge&logo=Hibernate&logoColor=white"><img src="https://img.shields.io/badge/QueryDSL-0769AD?style=for-the-badge&logo=Java&logoColor=white"><img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"><img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"><img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white"><img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white">
 
-
 ## 📌 프로젝트 소개
 
-  <h2 align="center">
-    <strong>🎥 대용량 시청기록에 대한 통계 및 정산 시스템 📊</strong>
-  </h2>
-
-
+<h2 align="center">
+  <strong>대용량 시청기록에 대한 통계 및 정산 시스템</strong>
+</h2>
 
 ### 🛠️ 기능
 
 <table style="width: 100%;">
   <tr>
-    <th style="width: 40%;">👥 User Service</th>
-    <th style="width: 60%;">🎥 Streaming Service</th>
+    <th style="width: 40%;">User Service</th>
+    <th style="width: 60%;">Streaming Service</th>
   </tr>
   <tr>
     <td>👤 회원 가입</td>
@@ -35,10 +32,10 @@
 </table>
 
 ## 🔥 프로젝트 목표
-### 1.  1억 건의 데이터에 대한 배치 작업을 2분대로 처리
-### 2.  멀티 스레드와 멀티 프로세스 환경에서 원할하게 서비스 동작
+1. 1억 건의 데이터에 대한 배치 작업을 2분대로 처리
+2. 멀티 스레드와 멀티 프로세스 환경에서 원활하게 서비스 동작
 
-## 🏷️프로젝트 주요 경험 
+## 🏷️ 프로젝트 주요 경험
 
 ### 1. 배치 작업 성능 개선 (97.42% 향상)
 [📚 상세 개선 과정](https://www.notion.so/9e7b94b212764f31b2f76cc9dc8a7a8f)
@@ -46,10 +43,10 @@
 <details>
 <summary><strong>Quick Overview</strong></summary>
 
-### 📊 최종 성능
+#### 📊 최종 성능
 **1억 건 기준 실측 결과: 2m3s895ms**
 
-### 📈 성능 개선 추이
+#### 📈 성능 개선 추이
 
 | 단계 | 데이터 규모 | 처리 시간 | 개선율 |
 |------|------------|-----------|--------|
@@ -60,19 +57,17 @@
 
 *3차 최적화 결과는 1억 건 기준 실측치를 바탕으로 5천만 건에 대해 선형적으로 추정한 값입니다.
 
-### 🚀 주요 개선 포인트
+#### 🚀 주요 개선 포인트
 1. **1차 최적화**: Spring Batch 파티셔닝 도입, Chunk 크기 최적화
 2. **2차 최적화**: 데이터베이스 인덱싱, 쿼리 최적화
 3. **3차 최적화**: JPA 제거, JDBC 직접 사용, 벌크 연산 적용
 
 </details>
 
-
-
 ### 2. 통계 및 정산 최적화
-- **플랫폼 스레드 활용**
-- **Chunk 동시성 제어**
-- **Spring Batch/DB Partitioning**
+- 플랫폼 스레드 활용
+- Chunk 동시성 제어
+- Spring Batch/DB Partitioning
 
 ### 3. 부하 분산 및 서비스 매핑
 
@@ -110,9 +105,8 @@
 
 </details>
 
-
 ## 🔍 아키텍처
-![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
+![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
 
 ## 📃 프로젝트 상세
 
@@ -127,4 +121,3 @@
 ### 📘 API 문서
 
 [![Postman API Documentation](https://img.shields.io/badge/Postman-API%20Documentation-orange?style=for-the-badge&logo=postman)](https://documenter.getpostman.com/view/27591971/2sA3XWdKBy)
-
