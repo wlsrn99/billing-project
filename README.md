@@ -47,7 +47,7 @@
 <summary><strong>Quick Overview</strong></summary>
 
 ### 📊 최종 성능
-✅ **1억 건 기준 실측 결과: 2m3s895ms**
+**1억 건 기준 실측 결과: 2m3s895ms**
 
 ### 📈 성능 개선 추이
 
