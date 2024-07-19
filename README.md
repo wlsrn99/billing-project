@@ -38,7 +38,7 @@
 ## 🏷️ 프로젝트 주요 경험
 
 ### 1. 배치 작업 성능 개선 (97.42% 향상)
-[📚 상세 개선 과정](https://www.notion.so/9e7b94b212764f31b2f76cc9dc8a7a8f)
+[📚 상세 개선 과정](https://delightful-rotate-bfd.notion.site/9e7b94b212764f31b2f76cc9dc8a7a8f)
 
 <details>
 <summary><strong>Quick Overview</strong></summary>
@@ -105,6 +105,12 @@
 
 </details>
 
+### 🚨 트러블 슈팅
+- [Spring Batch 멀티스레드 환경에서 메타데이터 충돌 문제](https://delightful-rotate-bfd.notion.site/Spring-Batch-8f58955119d6488089a039dc17f4e52a)
+- [Spring Batch 메타데이터 테이블 초기화 문제](https://delightful-rotate-bfd.notion.site/Spring-Batch-42eb0fca09814619891d276b617ee056)
+- [Spring Batch 데이터베이스 연결 풀 부족 문제](https://delightful-rotate-bfd.notion.site/Spring-Batch-f3771808430e401e8ef8ff29d238ae5b)
+- [멀티모듈 CI MySQL 접속 불가 문제](https://delightful-rotate-bfd.notion.site/CI-a0f15147ac54407493c2f6fb8cfa4615)
+- [Docker 컨테이너 간 MySQL 접속 불가 문제](https://delightful-rotate-bfd.notion.site/Docker-MySQL-d7d65a68b0b84f7199763f227db6849b)
 ## 🔍 아키텍처
 ![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
 
