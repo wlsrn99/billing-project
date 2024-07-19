@@ -7,11 +7,10 @@
 
 ## 📌 프로젝트 소개
 
-<div align="center">
-  <h2>
-    <strong>🎥 대용량 시청기록 통계 및 정산 시스템 📊</strong>
+  <h2 align="center">
+    <strong>🎥 대용량 시청기록에 대한 통계 및 정산 시스템 📊</strong>
   </h2>
-</div>
+
 
 ---
 
