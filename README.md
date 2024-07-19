@@ -7,13 +7,16 @@
 
 ## 📌 프로젝트 소개
 
+<div align="center">
+  <h2>
+    <strong>🎥 대용량 시청기록 통계 및 정산 시스템 📊</strong>
+  </h2>
+</div>
 
-  <h3  style="font-weight: bold; color: white; padding: 10px;">
-    ️ 대용량 시청기록에 대한 통계 및 정산 시스템 
-  </h3>
+---
 
 
-### 🛠️ 제공 기능
+### 🛠️ 기능
 
 <table style="width: 100%;">
   <tr>
