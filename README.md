@@ -81,7 +81,7 @@
 - **중앙 집중식 인증 및 권한 부여**: JWT 토큰 기반의 보안 체계 구축
 - **로드 밸런싱**: 라운드 로빈 방식을 통한 효율적인 트래픽 분산
 
-### 3.2 Spring Cloud Eureka
+#### 3.2 Spring Cloud Eureka
 
 - **자동 서비스 매핑**
   - Eureka 서비스 ID 기반 동적 라우팅
@@ -90,7 +90,7 @@
   - 자동화된 서비스 등록 및 검색 메커니즘
   - 실시간 헬스 체크 및 상태 모니터링
 
-### 3.3 Streaming Service CQRS
+#### 3.3 Streaming Service CQRS
 - **CQRS 패턴 적용**
   - 명령(쓰기)과 조회(읽기) 책임의 명확한 분리
 - **DB Main-Replica 구조**
