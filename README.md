@@ -110,6 +110,11 @@
 - [Spring Batch 데이터베이스 연결 풀 부족 문제](https://delightful-rotate-bfd.notion.site/Spring-Batch-f3771808430e401e8ef8ff29d238ae5b)
 - [멀티모듈 CI MySQL 접속 불가 문제](https://delightful-rotate-bfd.notion.site/CI-a0f15147ac54407493c2f6fb8cfa4615)
 - [Docker 컨테이너 간 MySQL 접속 불가 문제](https://delightful-rotate-bfd.notion.site/Docker-MySQL-d7d65a68b0b84f7199763f227db6849b)
+
+### 📝기술적 의사 결정
+- [Query DSL 도입](https://delightful-rotate-bfd.notion.site/QueryDSL-0744c34dbe304c72b37ba6b3ff2122d2)
+- [인증 및 토큰 발급 로직 분리](https://delightful-rotate-bfd.notion.site/14f76b750a6045d4bcfa501a512d2fab)
+- [비관적락 VS 낙관적락 VS 원자적 연산](https://delightful-rotate-bfd.notion.site/VS-VS-2281bac695a94c978bc3d00984b5076c)
 ## 🔍 아키텍처
 ![정산프로젝트 아키텍처3](https://github.com/user-attachments/assets/e8a2cd35-44b2-4e3d-aacc-69beb6342018)
 
