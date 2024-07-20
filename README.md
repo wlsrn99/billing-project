@@ -60,7 +60,7 @@
 - **2차 최적화**: 데이터베이스 인덱싱, 쿼리 최적화
 - **3차 최적화**: JPA 제거, JDBC 직접 사용, 벌크 연산 적용
 
-[📚 성능 테스트 과정 상세 내용](https://delightful-rotate-bfd.notion.site/Spring-Batch-63fe19c8c43443669b11a500f1944703)
+#### 1.4 [📚 성능 테스트 과정 상세 내용](https://delightful-rotate-bfd.notion.site/Spring-Batch-63fe19c8c43443669b11a500f1944703)
 
 
 
