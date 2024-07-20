@@ -132,4 +132,5 @@
 
 [![Postman API Documentation](https://img.shields.io/badge/Postman-API%20Documentation-orange?style=for-the-badge&logo=postman)](https://documenter.getpostman.com/view/27591971/2sA3XWdKBy)
 
-### 
+### 📙ERD
+<img width="599" alt="스크린샷 2024-07-20 오후 5 15 10" src="https://github.com/user-attachments/assets/fcf36423-03c0-4d35-8691-2f3e9c0b79ec">
