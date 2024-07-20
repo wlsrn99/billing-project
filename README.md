@@ -38,10 +38,6 @@
 ## 🏷️ 프로젝트 주요 경험
 
 ### 1. 배치 작업 성능 개선 (97.42% 향상)
-[📚 성능 테스트 과정 상세](https://delightful-rotate-bfd.notion.site/Spring-Batch-63fe19c8c43443669b11a500f1944703)
-
-<details>
-<summary><strong>Quick Overview</strong></summary>
 
 #### 📊 최종 성능
 **1억 건 기준 실측 결과: 2m3s895ms**
@@ -62,7 +58,7 @@
 2. **2차 최적화**: 데이터베이스 인덱싱, 쿼리 최적화
 3. **3차 최적화**: JPA 제거, JDBC 직접 사용, 벌크 연산 적용
 
-</details>
+[📚 성능 테스트 과정 상세 내용](https://delightful-rotate-bfd.notion.site/Spring-Batch-63fe19c8c43443669b11a500f1944703)
 
 ### 2. 통계 및 정산 최적화
 - 플랫폼 스레드 활용
@@ -71,16 +67,12 @@
 
 ### 3. 부하 분산 및 서비스 매핑
 
-<details>
-<summary><strong>Spring Cloud Gateway</strong></summary>
-
+#### Spring Cloud Gateway
 - 중앙 집중식 인증 및 권한 부여, JWT 토큰 검증
 - 로드 밸런싱: 라운드 로빈 방식으로 트래픽 분산
 
-</details>
 
-<details>
-<summary><strong>Spring Cloud Eureka</strong></summary>
+#### Spring Cloud Eureka
 
 - Eureka 서비스 ID를 활용한 자동 서비스 매핑
    - Eureka에 등록된 서비스 ID를 활용하여 요청을 자동으로 해당 서비스로 매핑
@@ -89,10 +81,9 @@
    - 서비스 자동 등록 및 검색
    - 서비스 헬스 체크 및 실시간 상태 모니터링
 
-</details>
 
-<details>
-<summary><strong>Streaming Service CQRS</strong></summary>
+
+#### Streaming Service CQRS
 
 - CQRS (Command Query Responsibility Segregation) 패턴 적용
    - 명령(쓰기 작업)과 조회(읽기 작업)의 책임 분리
@@ -103,7 +94,6 @@
 - 트래픽 분산 및 가용성 향상
    - 읽기 작업의 부하를 Replica DB로 분산
 
-</details>
 
 ### 🚨 트러블 슈팅
 - [Spring Batch 멀티스레드 환경에서 메타데이터 충돌 문제](https://delightful-rotate-bfd.notion.site/Spring-Batch-8f58955119d6488089a039dc17f4e52a)
@@ -127,3 +117,5 @@
 ### 📘 API 문서
 
 [![Postman API Documentation](https://img.shields.io/badge/Postman-API%20Documentation-orange?style=for-the-badge&logo=postman)](https://documenter.getpostman.com/view/27591971/2sA3XWdKBy)
+
+### 
