@@ -1,0 +1,29 @@
+#sudo docker build -f docker/Dockerfile-discovery -t wlsrn331/module-discovery:latest .
+#docker push wlsrn331/module-discovery:latest
+
+# Gradle을 사용하여 스프링 부트 애플리케이션 빌드
+FROM gradle:jdk21-alpine AS builder
+WORKDIR /app
+
+# 필수 패키지 설치
+RUN apk add --no-cache findutils
+
+# 루트 디렉토리의 build.gradle과 settings.gradle 복사
+COPY ../build.gradle /app/
+COPY ../settings.gradle /app/
+
+# 현재 하위 모듈의 build.gradle, 소스 코드 복사
+COPY ../module-discovery/build.gradle /app/module-discovery/
+COPY ../module-discovery/src /app/module-discovery/src
+
+# gradlew와 gradle 디렉토리 복사
+COPY ../gradlew /app/
+COPY ../gradle /app/gradle
+
+RUN chmod +x ./gradlew    # gradlew 실행 권한 부여
+RUN ./gradlew bootJar -p ./module-discovery  # 하위 모듈을 명시적으로 지정
+
+# 빌드된 JAR 파일을 실행할 새로운 Docker 이미지 생성
+FROM openjdk:21
+COPY --from=builder /app/module-discovery/build/libs/*.jar /app/app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

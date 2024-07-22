@@ -1,12 +1,47 @@
 # docker-compose -f docker-compose-service.yml up -d
 version: '3.8'
 services:
+  module-discovery:
+    image: wlsrn331/module-discovery:latest
+    ports:
+      - "8761:8761"
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  module-gateway:
+    image: wlsrn331/module-gateway:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+    depends_on:
+      module-discovery:
+        condition: service_healthy
+
+  module-batch:
+    image: wlsrn331/module-batch:latest
+    ports:
+      - "8081:8081"
+    networks:
+      - my_network
+    depends_on:
+      module-discovery:
+        condition: service_healthy
+
   module-streaming:
     image: wlsrn331/module-streaming:latest
     ports:
       - "0:0"
     networks:
       - my_network
+    depends_on:
+      module-discovery:
+        condition: service_healthy
 
   module-user:
     image: wlsrn331/module-user:latest
@@ -14,6 +49,9 @@ services:
       - "0:0"
     networks:
       - my_network
+    depends_on:
+      module-discovery:
+        condition: service_healthy
 
 networks:
   my_network:
