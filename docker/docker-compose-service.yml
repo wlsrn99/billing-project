@@ -4,14 +4,14 @@ services:
   module-streaming:
     image: wlsrn331/module-streaming:latest
     ports:
-      - "8082:8082"
+      - "0:0"
     networks:
       - my_network
 
   module-user:
     image: wlsrn331/module-user:latest
     ports:
-      - "8081:8081"
+      - "0:0"
     networks:
       - my_network
 

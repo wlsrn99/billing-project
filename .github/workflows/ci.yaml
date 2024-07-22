@@ -20,14 +20,17 @@ jobs:
 
       - name: Build Docker images
         run: |
+          cd docker
           docker build -t mysql-reader -f Dockerfile-reader .
           docker build -t mysql-writer -f Dockerfile-writer .
+        
 
       - name: Build and run Docker Compose
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          docker-compose -f docker-compose-mysql.yml up -d  
+          docker-compose -f docker/docker-compose-mysql.yml up -d  
+          cd ..
 
       - name: Set up JDK 21  # JDK 21을 설치
         uses: actions/setup-java@v3
