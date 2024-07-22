@@ -38,8 +38,12 @@
 #### 2. 멀티 스레드와 멀티 프로세스 환경에서 원활하게 서비스 동작
 
 ## 🏷️ 프로젝트 주요 경험
+<div align="center">
 
 ### 1. 배치 작업 성능 개선 (97.42% 향상)
+
+</div>
+
 
 #### 1.1 최종 성능 📊
 - #### 1억 건 기준 실측 결과: 2m3s895ms
@@ -62,10 +66,12 @@
 
 #### 1.4 [📚 성능 테스트 과정 상세 내용](https://delightful-rotate-bfd.notion.site/Spring-Batch-63fe19c8c43443669b11a500f1944703)
 
-
+<br>
+<div align="center">
 
 ### 2. 통계 및 정산 최적화
 
+</div>
 
 #### 2.1 플랫폼 스레드 활용
 - 고성능 처리를 위한 최신 Java 플랫폼 스레드 기술 적용
@@ -74,7 +80,13 @@
 #### 2.3 Spring Batch Partitioning/DB Partitioning
 - 대규모 데이터 처리를 위한 분산 처리 기법 도입
 
+<br>
+
+<div align="center">
+
 ### 3. 부하 분산 및 서비스 매핑
+
+</div>
 
 #### 3.1 Spring Cloud Gateway
 
