@@ -1,4 +1,4 @@
-#sudo docker build -f docker/Dockerfile-gateway -t wlsrn331/module-user:gateway .
+#sudo docker build -f docker/Dockerfile-gateway -t wlsrn331/module-gateway:latest .
 #docker push wlsrn331/module-gateway:latest
 
 # Gradle을 사용하여 스프링 부트 애플리케이션 빌드

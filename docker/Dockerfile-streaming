@@ -1,4 +1,4 @@
-#sudo docker build -f Dockerfile-streaming -t wlsrn331/module-streaming:latest .
+#sudo docker build -f docker/Dockerfile-streaming -t wlsrn331/module-streaming:latest .
 #docker push wlsrn331/module-streaming:latest
 
 # Gradle을 사용하여 스프링 부트 애플리케이션 빌드

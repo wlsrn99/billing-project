@@ -1,4 +1,4 @@
-#sudo docker build -f Dockerfile-user -t wlsrn331/module-user:latest .
+#sudo docker build -f docker/Dockerfile-user -t wlsrn331/module-user:latest .
 #docker push wlsrn331/module-user:latest
 
 # Gradle을 사용하여 스프링 부트 애플리케이션 빌드
