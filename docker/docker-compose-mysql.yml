@@ -33,6 +33,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-user-db
+    container_name: mysql-user
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: user

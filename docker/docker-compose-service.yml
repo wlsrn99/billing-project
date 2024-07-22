@@ -3,6 +3,7 @@ version: '3.8'
 services:
   module-discovery:
     image: wlsrn331/module-discovery:latest
+    container_name: module-discovery
     ports:
       - "8761:8761"
     networks:
