@@ -23,6 +23,7 @@ import com.billing.user.entity.UserType;
 import com.billing.user.jwt.JwtUtil;
 import com.billing.user.repository.UserRepository;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -39,7 +40,7 @@ public class UserService {
 	 * @return UserResponseDTO 회원 가입 결과
 	 */
 	@Transactional
-	public UserResponseDTO createUser(UserRequestDTO requestDTO) {
+	public UserResponseDTO createUser(@Valid UserRequestDTO requestDTO) {
 
 		//이메일 유효성 검사
 		validateUserEmail(requestDTO.getEmail());

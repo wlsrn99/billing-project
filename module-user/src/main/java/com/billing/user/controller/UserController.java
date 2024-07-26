@@ -1,4 +1,4 @@
-package com.billing.user.Controller;
+package com.billing.user.controller;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

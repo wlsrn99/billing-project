@@ -130,11 +130,6 @@ public class JwtUtil {
 		return getEmailFromClaims(token);
 	}
 
-	// 리프레시 토큰에서 email 가져오기
-	public String getEmailFromRefreshToken(String token) {
-		return getEmailFromClaims(token);
-	}
-
 	// 리프레시 토큰에서 role 가져오기
 	public List<String> getRolesFromRefreshToken(String token) {
 		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
@@ -156,7 +151,7 @@ public class JwtUtil {
 	// 리프레시 토큰을 사용하여 새로운 액세스 토큰 발급
 	public String refreshAccessToken(String refreshToken) {
 		if (validateRefreshToken(refreshToken)) {
-			String email = getEmailFromRefreshToken(refreshToken);
+			String email = getEmailFromClaims(refreshToken);
 
 			List<String> roles = getRolesFromRefreshToken(refreshToken);
 
