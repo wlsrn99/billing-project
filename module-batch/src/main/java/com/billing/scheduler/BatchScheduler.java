@@ -28,7 +28,7 @@ public class BatchScheduler {
 	private final JobRegistry jobRegistry;
 
 
-	@Scheduled(cron = "0 33 22 * * *", zone = "Asia/Seoul")
+	@Scheduled(cron = "0 28 17 * * *", zone = "Asia/Seoul")
 	public void runVideoStatisticJob() {
 		try {
 			log.info("Running video statistics job");

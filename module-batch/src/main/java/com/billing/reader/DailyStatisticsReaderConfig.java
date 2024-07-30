@@ -63,7 +63,7 @@ public class DailyStatisticsReaderConfig {
 	private PagingQueryProvider createWatchHistoryQueryProvider(String partitionDate) throws Exception {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
-		factory.setSelectClause("SELECT /*+ INDEX(w idx_watch_history_video_id_created_at) */ " +
+		factory.setSelectClause("SELECT /*+ INDEX(w idx_watch_history_video_id) */ " +
 			"w.video_id, " +
 			"COUNT(DISTINCT w.id) as daily_view_count, " +
 			"SUM(w.ad_view_count) as daily_ad_view_count, " +
@@ -108,7 +108,7 @@ public class DailyStatisticsReaderConfig {
 	private PagingQueryProvider createVideoStatisticsQueryProvider() throws Exception {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
-		factory.setSelectClause("SELECT /*+ INDEX(vs idx_video_statistics_date_video_id) */ video_id, date, daily_view_count, daily_ad_view_count, daily_duration");
+		factory.setSelectClause("SELECT /*+ INDEX(vs idx_watch_history_video_id) */ video_id, date, daily_view_count, daily_ad_view_count, daily_duration");
 		factory.setFromClause("FROM video_statistics vs");
 		factory.setWhereClause("WHERE date = :date AND video_id BETWEEN :startVideoId AND :endVideoId");
 		factory.setSortKey("video_id");

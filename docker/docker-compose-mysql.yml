@@ -11,6 +11,8 @@ services:
       MYSQL_DATABASE: billing
     ports:
       - "3305:3306"
+    volumes:
+      - ./data/mysql_writer:/var/lib/mysql
     networks:
       - my_network
 
@@ -24,6 +26,8 @@ services:
       MYSQL_DATABASE: billing
     ports:
       - "3307:3306"
+    volumes:
+      - ./data/mysql_reader:/var/lib/mysql
     networks:
       - my_network
     depends_on:
@@ -39,6 +43,8 @@ services:
       MYSQL_DATABASE: user
     ports:
       - "3308:3306"
+    volumes:
+      - ./data/mysql_user:/var/lib/mysql
     networks:
       - my_network
 
