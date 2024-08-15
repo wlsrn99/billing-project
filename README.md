@@ -74,7 +74,7 @@
 </div>
 
 #### 2.1 플랫폼 스레드 활용
-- 고성능 처리를 위한 최신 Java 플랫폼 스레드 기술 적용
+- 고성능 처리를 위한 Java 플랫폼 스레드 적용
 #### 2.2 Chunk 동시성 제어
 - 데이터 처리의 효율성 증대를 위한 Chunk 기반 동시성 관리
 #### 2.3 Spring Batch Partitioning/DB Partitioning
